@@ -41,6 +41,8 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
 
         let jd = req.body.jobDescription || "";
         let candidateName = req.body.candidateName || "Unknown Candidate";
+        let linkedinUrl = req.body.linkedinUrl || "";
+        let company = req.body.company || "General";
         let userId = req.body.userId || null;
 
         // Parse PDF
@@ -52,7 +54,9 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
         try {
             const response = await axios.post('http://127.0.0.1:5000/analyze', {
                 resume_text: text,
-                job_description: jd
+                job_description: jd,
+                linkedin_url: linkedinUrl,
+                company: company
             });
             aiResult = response.data;
         } catch (err) {
@@ -70,16 +74,39 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
                 ai_coach_suggestions: [],
                 suggested_roles: [],
                 top_industry_skills: [],
-                suggestions: ["Provide AI service online"]
+                suggestions: ["Provide AI service online"],
+                project_suggestions: [],
+                quantification_suggestions: [],
+                linkedin_feedback: "AI Service Offline",
+                raw_resume_text: "Service offline.",
+                nexus_score: 50,
+                optimized_summary: "Service offline.",
+                chatbot_message: "Oops, AI Service is down.",
+                annotated_sentences: []
             };
         }
 
         const candidate = {
             id: Date.now().toString(),
             name: candidateName,
+            linkedinUrl,
+            company,
             status: aiResult.status,
             matchScore: aiResult.match_score,
-            atsScore: aiResult.ats_score,
+            atsScore: aiResult.ats_compatibility || aiResult.ats_score,
+            nexusScore: aiResult.nexus_score,
+            atsCompatibility: aiResult.ats_compatibility,
+            contentQuality: aiResult.content_quality,
+            formattingScore: aiResult.formatting_score,
+            linkedinPresence: aiResult.linkedin_presence,
+            wordCount: aiResult.word_count,
+            readingTime: aiResult.reading_time,
+            diagnosticReport: aiResult.diagnostic_report || [],
+            coachSteps: aiResult.coach_steps || [],
+            rawResumeText: aiResult.raw_resume_text,
+            optimizedSummary: aiResult.optimized_summary,
+            chatbotMessage: aiResult.chatbot_message,
+            annotatedSentences: aiResult.annotated_sentences,
             skills: aiResult.resume_skills,
             matchedSkills: aiResult.matched_skills,
             missingSkills: aiResult.missing_skills,
@@ -88,6 +115,9 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
             suggestions: aiResult.suggestions,
             roadmap: aiResult.roadmap,
             aiCoachSuggestions: aiResult.ai_coach_suggestions,
+            projectSuggestions: aiResult.project_suggestions || [],
+            quantificationSuggestions: aiResult.quantification_suggestions || [],
+            linkedinFeedback: aiResult.linkedin_feedback || "",
             suggestedRoles: aiResult.suggested_roles,
             topIndustrySkills: aiResult.top_industry_skills,
             createdAt: new Date().toISOString()
@@ -168,7 +198,19 @@ app.post('/api/report/download', (req, res) => {
         doc.fontSize(18).fillColor('#ea580c').text('Skill Assessment', { underline: true });
         doc.fontSize(12).fillColor('#000000');
         doc.text(`Matched Skills: ${candidate.matchedSkills?.join(', ') || 'None'}`);
-        doc.text(`Missing Skills: ${candidate.missingSkills?.join(', ') || 'None'}`);
+        doc.moveDown();
+
+        // Optimized Keywords Section
+        doc.fontSize(16).fillColor('#10b981').text('Optimized Keywords to Inject into Resume');
+        doc.fontSize(11).fillColor('#000000').text('To pass the ATS, ensure you add the following highlighted keywords:');
+        doc.moveDown(0.5);
+        if (candidate.missingSkills && candidate.missingSkills.length > 0) {
+            candidate.missingSkills.forEach(skill => {
+                doc.fillColor('#ef4444').text(`• ${skill.toUpperCase()}`);
+            });
+        } else {
+            doc.fillColor('#000000').text('No missing skills detected!');
+        }
         doc.moveDown();
 
         // Roadmap

@@ -10,6 +10,8 @@ export default function UploadPage() {
     const [file, setFile] = useState(null);
     const [jobDescription, setJobDescription] = useState('');
     const [candidateName, setCandidateName] = useState('');
+    const [linkedinUrl, setLinkedinUrl] = useState('');
+    const [company, setCompany] = useState('General');
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -41,6 +43,8 @@ export default function UploadPage() {
         formData.append('resume', file);
         formData.append('jobDescription', jobDescription);
         formData.append('candidateName', candidateName || 'Anonymous Student');
+        formData.append('linkedinUrl', linkedinUrl);
+        formData.append('company', company);
         if (user) {
             formData.append('userId', user.id);
         }
@@ -101,14 +105,41 @@ export default function UploadPage() {
 
                 {/* Input Column */}
                 <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-gray-300 text-sm font-medium">Your Name (Optional)</label>
+                            <input
+                                value={candidateName}
+                                onChange={(e) => setCandidateName(e.target.value)}
+                                placeholder="e.g., Sai Ram"
+                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-gray-300 text-sm font-medium">LinkedIn URL (Optional)</label>
+                            <input
+                                value={linkedinUrl}
+                                onChange={(e) => setLinkedinUrl(e.target.value)}
+                                placeholder="linkedin.com/in/username"
+                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            />
+                        </div>
+                    </div>
+                    
                     <div className="space-y-2">
-                        <label className="text-gray-300 text-sm font-medium">Your Name (Optional)</label>
-                        <input
-                            value={candidateName}
-                            onChange={(e) => setCandidateName(e.target.value)}
-                            placeholder="e.g., Sai Ram"
-                            className="w-full bg-gray-900/50 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                        />
+                        <label className="text-gray-300 text-sm font-medium">Target Company ATS</label>
+                        <select
+                            value={company}
+                            onChange={(e) => setCompany(e.target.value)}
+                            className="w-full bg-gray-900/50 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                        >
+                            <option value="General">General (Default ATS)</option>
+                            <option value="Wipro">Wipro</option>
+                            <option value="Infosys">Infosys</option>
+                            <option value="TCS">TCS</option>
+                            <option value="Cognizant">Cognizant</option>
+                            <option value="Accenture">Accenture</option>
+                        </select>
                     </div>
 
                     <div className="space-y-2 flex-grow">

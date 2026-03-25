@@ -27,7 +27,7 @@ export default function LoginPage() {
             } else {
                 loggedInUser = await register(name, email, password, role);
             }
-            navigate(loggedInUser.role === 'recruiter' ? '/recruiter' : '/history');
+            navigate('/history');
         } catch (err) {
             setError(err.response?.data?.error || 'Authentication failed');
         } finally {
@@ -72,19 +72,6 @@ export default function LoginPage() {
                                     className="w-full bg-gray-900/50 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                                     placeholder="Sai Ram"
                                 />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-sm text-gray-400 font-medium">I am a...</label>
-                                <div className="flex gap-4">
-                                    <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border cursor-pointer transition-all ${role === 'jobseeker' ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400' : 'bg-gray-900/50 border-gray-700 text-gray-400 hover:border-gray-500'}`}>
-                                        <input type="radio" name="role" value="jobseeker" checked={role === 'jobseeker'} onChange={() => setRole('jobseeker')} className="hidden" />
-                                        <span className="font-bold">Job Seeker</span>
-                                    </label>
-                                    <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border cursor-pointer transition-all ${role === 'recruiter' ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-gray-900/50 border-gray-700 text-gray-400 hover:border-gray-500'}`}>
-                                        <input type="radio" name="role" value="recruiter" checked={role === 'recruiter'} onChange={() => setRole('recruiter')} className="hidden" />
-                                        <span className="font-bold">Recruiter</span>
-                                    </label>
-                                </div>
                             </div>
                         </div>
                     )}
