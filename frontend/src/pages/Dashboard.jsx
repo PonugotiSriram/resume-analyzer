@@ -460,9 +460,9 @@ export default function Dashboard() {
                         <Activity className="w-3 h-3 text-blue-500"/> Performance Metrics
                     </h3>
                     <ProgressBar label="ATS Connectivity" percentage={ats_compatibility || 0} colorClass="bg-blue-600" />
-                    <ProgressBar label="Content Quality" percentage={result.content_quality || 0} colorClass="bg-green-600" />
-                    <ProgressBar label="Formatting" percentage={result.formatting_score || 0} colorClass="bg-amber-600" />
-                    <ProgressBar label="Online Presence" percentage={result.linkedin_presence || 0} colorClass="bg-purple-600" />
+                    <ProgressBar label="Content Quality" percentage={content_quality || 0} colorClass="bg-green-600" />
+                    <ProgressBar label="Formatting" percentage={formatting_score || 0} colorClass="bg-amber-600" />
+                    <ProgressBar label="Online Presence" percentage={linkedin_presence || 0} colorClass="bg-purple-600" />
                 </div>
 
                 {/* Section Sidebar - Accordion Menu */}
