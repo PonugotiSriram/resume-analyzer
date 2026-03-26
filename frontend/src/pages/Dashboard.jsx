@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import { FileDown, Activity, Linkedin, Clock, Hash, Zap, Target, Mail, ArrowRightLeft, Crown, Loader2, Circle, Layout, MapPin, CheckCircle, XCircle } from 'lucide-react';
+import { FileDown, Activity, Linkedin, Clock, Hash, Zap, Target, Mail, ArrowRightLeft, Crown, Loader2, Circle, Layout, MapPin, CheckCircle, XCircle, Type, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -188,7 +188,8 @@ export default function Dashboard() {
         suggestedRoles,
         matchedSkills, missingSkills, optimizedSummary, 
         wordCount, readingTime, diagnosticReport, coachSteps,
-        quantificationSuggestions
+        quantificationSuggestions,
+        spelling_errors, pronoun_errors, complex_sentences, skills_targeting
     } = result;
 
     // Step 2: Data Extraction
@@ -235,7 +236,7 @@ export default function Dashboard() {
         { title: 'Contact Information', aspect: hasContact },
         { title: 'Section Integrity', aspect: hasExperience && hasEducation },
         { title: 'Content Density', aspect: safeWordCount > 200 },
-        { title: 'ATS Keywords', aspect: matchedSkills?.length > 0 }
+        { title: 'Skills & Keywords', aspect: matchedSkills?.length > 0 }
     ];
 
     const handleDownload = async () => {
@@ -394,12 +395,29 @@ export default function Dashboard() {
 
                     </div>
 
-                    {/* ATS Keywords / Skills Card */}
+                    {/* Skills & Keyword Targeting Card */}
                     <div id="skills" className="scroll-mt-24 border border-slate-200 rounded-xl p-6 md:p-8 bg-white shadow-sm">
-                        <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">ATS Targeting & Keywords</h3>
+                        <div className="flex justify-between items-start mb-6">
+                            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                                <Target className="w-5 h-5 text-blue-500" /> Skills & Keyword Targeting
+                            </h3>
+                            {skills_targeting && skills_targeting.targeting_score !== undefined && (
+                                <div className="text-right flex items-center gap-2">
+                                    <div className="text-right">
+                                        <span className="block text-2xl font-black text-blue-600">{skills_targeting.targeting_score}%</span>
+                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold">Match Score</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        {skills_targeting && skills_targeting.recommendation && (
+                            <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800 font-medium flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-blue-500"/> {skills_targeting.recommendation}
+                            </div>
+                        )}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-green-600"/> Found in Resume</h4>
+                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-green-600"/> Important keywords found</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {matchedSkills?.length > 0 ? matchedSkills.map(skill => (
                                         <span key={skill} className="px-3 py-1 bg-green-50 text-green-700 rounded text-xs font-bold border border-green-100">
@@ -409,7 +427,7 @@ export default function Dashboard() {
                                 </div>
                             </div>
                             <div>
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><XCircle className="w-3 h-3 text-red-600"/> Missing Required</h4>
+                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><XCircle className="w-3 h-3 text-red-600"/> Important keywords missing</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {missingSkills?.length > 0 ? missingSkills.map(skill => (
                                         <span key={skill} className="px-3 py-1 bg-red-50 text-red-700 rounded text-xs font-bold border border-red-100">
@@ -419,6 +437,89 @@ export default function Dashboard() {
                                         (!matchedSkills || matchedSkills.length === 0) ? 
                                         <span className="text-slate-400 text-xs font-medium">Paste JD to map against requirements.</span> :
                                         <span className="text-green-600 text-xs font-bold">Perfect match!</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Grammar & Tone Cards */}
+                    <div id="grammar-tone" className="scroll-mt-24">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Spelling & Grammar */}
+                            <div className="border border-slate-200 rounded-xl p-6 bg-white shadow-sm flex flex-col">
+                                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <Type className="w-5 h-5 text-indigo-500" /> Spelling & Grammar
+                                </h3>
+                                {spelling_errors && spelling_errors.length > 0 ? (
+                                    <ul className="space-y-3 flex-1 overflow-y-auto max-h-48 pr-2 custom-scrollbar">
+                                        {spelling_errors.map((err, i) => (
+                                            <li key={i} className="flex flex-col text-[13px] border-b border-slate-100 pb-2">
+                                                <span className="font-bold text-slate-700">Error found: <span className="text-red-600 font-medium">{err.word}</span></span>
+                                                <span className="font-bold text-slate-700 flex gap-1 items-center mt-1">
+                                                    <ArrowRightLeft className="w-3 h-3 text-slate-400"/> Suggestion: <span className="text-green-600">{err.suggestion}</span>
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 py-4">
+                                        <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
+                                        <p className="text-xs font-bold text-slate-600">No spelling errors found!</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Personal Pronoun Check */}
+                            <div className="border border-slate-200 rounded-xl p-6 bg-white shadow-sm flex flex-col">
+                                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <AlertTriangle className="w-5 h-5 text-amber-500" /> Personal Pronoun Check
+                                </h3>
+                                <div className="flex-1 flex flex-col">
+                                    {pronoun_errors && pronoun_errors.length > 0 ? (
+                                        <div className="flex flex-col gap-2">
+                                            <span className="font-bold text-slate-700 text-xs">Error found:</span>
+                                            <div className="flex flex-wrap gap-2">
+                                                {pronoun_errors.map((p, i) => (
+                                                    <span key={i} className="px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-bold border border-red-100 uppercase">{p}</span>
+                                                ))}
+                                            </div>
+                                            <div className="mt-2 text-[11px] text-slate-500 text-left bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span className="font-bold text-slate-700">Why it matters:</span> Avoid using personal pronouns like I, me, my in resume. Keep it short and professional
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
+                                            <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
+                                            <span className="text-sm font-bold text-green-700 mb-2">Great! No error detected</span>
+                                            <div className="mt-2 text-[11px] text-slate-500 text-left bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span className="font-bold text-slate-700">Why it matters:</span> Avoid using personal pronouns like I, me, my in resume. Keep it short and professional
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Complex Sentences */}
+                            <div className="border border-slate-200 rounded-xl p-6 bg-white shadow-sm flex flex-col">
+                                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <Layout className="w-5 h-5 text-teal-500" /> Complex Sentences
+                                </h3>
+                                <div className="flex-1 flex flex-col">
+                                    {complex_sentences && complex_sentences.length > 0 ? (
+                                        <div className="space-y-3 overflow-y-auto max-h-48 pr-2 custom-scrollbar">
+                                            {complex_sentences.map((cs, i) => (
+                                                <div key={i} className="text-[11px] bg-slate-50 border-l-2 border-red-400 p-2 rounded-r flex flex-col gap-1">
+                                                    <p className="text-slate-700 font-medium italic">"{cs.sentence}"</p>
+                                                    <p className="text-red-600 font-bold leading-tight">{cs.issue} {cs.fix}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 py-4">
+                                            <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
+                                            <span className="text-xs font-bold text-slate-600">Sentences are concise and readable.</span>
+                                        </div>
                                     )}
                                 </div>
                             </div>

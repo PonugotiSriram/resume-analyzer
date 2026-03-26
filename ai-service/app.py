@@ -11,6 +11,12 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+from spellchecker import SpellChecker
+try:
+    spell = SpellChecker()
+except:
+    spell = None
+
 # A predefined list of common tech skills for demonstration
 KNOWN_SKILLS = set([
     "python", "react", "sql", "docker", "system design", "aws", "javascript", 
@@ -162,18 +168,20 @@ def analyze_resume():
     # Quantification Highlighter & Heatmap
     quantification_suggestions = []
     annotated_sentences = []
+    complex_sentences = []
     
     sentences = resume_text.split('.')
     for s in sentences:
         s = s.strip()
-        if len(s.split()) > 3: # Ignore very short phrases
+        word_list = s.split()
+        if len(word_list) > 3: # Ignore very short phrases
             is_quantified = any(char.isdigit() for char in s) or '%' in s or '$' in s
             annotated_sentences.append({
                 "text": s + ".",
                 "is_quantified": is_quantified
             })
             
-        if len(s.split()) > 8: # Arbitrary heuristic for substantial sentences
+        if len(word_list) > 8: # Arbitrary heuristic for substantial sentences
             if not any(char.isdigit() for char in s) and '%' not in s and '$' not in s:
                 if len(quantification_suggestions) < 3:
                     rec = get_ai_recommendation(s)
@@ -182,6 +190,43 @@ def analyze_resume():
                         "issue": rec["issue"],
                         "fix": rec["fix"]
                     })
+        
+        if len(word_list) > 25:
+            if len(complex_sentences) < 5:
+                complex_sentences.append({
+                    "sentence": s,
+                    "issue": "Sentence is too long (" + str(len(word_list)) + " words).",
+                    "fix": "Break this into multiple shorter bullet points."
+                })
+
+    # Spell Check
+    spelling_errors = []
+    if spell:
+        words_to_check = re.findall(r'\b[a-zA-Z]+\b', resume_text)
+        words_to_check = [w.lower() for w in words_to_check if w.lower() not in KNOWN_SKILLS and len(w) > 2]
+        misspelled = spell.unknown(words_to_check)
+        for idx, word in enumerate(misspelled):
+            if idx >= 5: break # Limit to top 5 errors to avoid huge payload
+            correction = spell.correction(word)
+            if correction and correction != word:
+                spelling_errors.append({
+                    "word": word,
+                    "suggestion": correction
+                })
+
+    # Pronoun Check
+    pronouns = ['i', 'me', 'my', 'mine', 'we', 'us', 'our', 'ours']
+    pronoun_pattern = r'\b(' + '|'.join(pronouns) + r')\b'
+    found_pronouns_raw = re.findall(pronoun_pattern, resume_text, re.IGNORECASE)
+    pronoun_errors = list(set([p.lower() for p in found_pronouns_raw]))
+
+    # Skills Targeting
+    skills_targeting = {
+        "targeting_score": match_score,
+        "matched": matched_skills,
+        "missing": missing_skills,
+        "recommendation": f"Add '{missing_skills[0].title()}' and '{missing_skills[1].title()}' to your resume." if len(missing_skills) > 1 else "Strong keyword targeting! Keep it up."
+    }
 
     # LinkedIn Profile Analyzer (Mock)
     if linkedin_url:
@@ -325,7 +370,11 @@ def analyze_resume():
         "status": status,
         "quantification_suggestions": quantification_suggestions,
         "suggested_roles": job_roles,
-        "section_grades": section_grades
+        "section_grades": section_grades,
+        "spelling_errors": spelling_errors,
+        "pronoun_errors": pronoun_errors,
+        "complex_sentences": complex_sentences,
+        "skills_targeting": skills_targeting
     })
 
 if __name__ == '__main__':
