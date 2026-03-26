@@ -229,7 +229,7 @@ export default function Dashboard() {
         }
     }, [scanPhase]);
 
-    if (!result) return <Navigate to="/" />;
+    // Allow direct navigation to /dashboard without throwing or redirecting.
 
     const {
         suggestedRoles = [],

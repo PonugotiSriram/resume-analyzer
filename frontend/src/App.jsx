@@ -76,15 +76,17 @@ function AppRoutes() {
   const { user } = useAuth();
   return (
     <Routes>
-      <Route path="/" element={user ? <Navigate to="/upload" replace /> : <LandingPage />} />
+      <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="/login" element={user ? <Navigate to="/upload" replace /> : <LoginPage />} />
       <Route path="/upload" element={<UploadPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
 
       {/* Protected Routes */}
-
       <Route path="/papers" element={<ProtectedRoute><PapersPage /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
+      
+      {/* Vercel SPA Fallback Route */}
+      <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 }
