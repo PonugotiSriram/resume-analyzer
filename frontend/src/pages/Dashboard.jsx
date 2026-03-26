@@ -37,8 +37,8 @@ const ScoreRing = ({ calculatedScore, scanPhase }) => {
     // Use standard Tailwind colors for the ring
     const isLow = displayScore < 60;
     const isMedium = displayScore >= 60 && displayScore < 80;
-    const strokeColor = scanPhase < 4 ? '#cbd5e1' : (isLow ? '#ef4444' : (isMedium ? '#f59e0b' : '#16a34a'));
-    const textColor = scanPhase < 4 ? 'text-slate-300' : 'text-slate-900';
+    const strokeColor = scanPhase < 4 ? '#374151' : (isLow ? '#f43f5e' : (isMedium ? '#fbbf24' : '#10b981'));
+    const textColor = scanPhase < 4 ? 'text-gray-600' : 'text-gray-100';
     
     const radius = 64;
     const circumference = 2 * Math.PI * radius;
@@ -46,8 +46,8 @@ const ScoreRing = ({ calculatedScore, scanPhase }) => {
 
     return (
         <div className="relative w-40 h-40 flex items-center justify-center mx-auto mb-6">
-            <svg className="transform -rotate-90 w-full h-full" viewBox="0 0 160 160">
-                <circle cx="80" cy="80" r={radius} stroke="#f8fafc" strokeWidth="4" fill="transparent" />
+            <svg className="transform -rotate-90 w-full h-full" viewBox="0 0 160 160" style={{ filter: scanPhase >= 4 ? `drop-shadow(0 0 6px ${strokeColor}80)` : 'none' }}>
+                <circle cx="80" cy="80" r={radius} stroke="#1f2937" strokeWidth="4" fill="transparent" />
                 <motion.circle 
                     cx="80" cy="80" r={radius} 
                     stroke={strokeColor} 
@@ -61,7 +61,7 @@ const ScoreRing = ({ calculatedScore, scanPhase }) => {
             </svg>
             <div className={`absolute flex flex-col items-center justify-center transition-colors duration-500 ${textColor}`}>
                 <span className="text-5xl font-black tracking-tighter">{displayScore}</span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Nexus Score</span>
+                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">Nexus Score</span>
             </div>
         </div>
     );
@@ -72,11 +72,11 @@ const ScoreRing = ({ calculatedScore, scanPhase }) => {
 // ==========================================
 const ProgressBar = ({ label, percentage, colorClass }) => (
     <div className="flex flex-col gap-1.5 mb-4">
-        <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-600">
+        <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-gray-400">
             <span>{label}</span>
-            <span className="text-slate-400">{percentage}%</span>
+            <span className="text-gray-500">{percentage}%</span>
         </div>
-        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
             <motion.div 
                 initial={{ width: 0 }} 
                 animate={{ width: `${percentage}%` }} 
@@ -98,19 +98,19 @@ const CritiqueCard = ({ qs }) => {
     if (showOptimized) borderClass = 'border-l-green-500';
 
     return (
-        <div className={`flex flex-col rounded-r-lg overflow-hidden border-y border-r border-slate-100 border-l-4 ${borderClass} bg-white transition-colors duration-300 mb-3 shadow-sm hover:shadow-md`}>
-            <div className="flex justify-between items-center bg-slate-50/50 px-4 py-3 border-b border-slate-50">
+        <div className={`flex flex-col rounded-r-lg overflow-hidden border-y border-r border-gray-700/50 border-l-4 ${borderClass} bg-gray-800/40 backdrop-blur-md transition-colors duration-300 mb-3 shadow-sm hover:shadow-md`}>
+            <div className="flex justify-between items-center bg-gray-800/30 px-4 py-3 border-b border-gray-800">
                 <div className="flex items-center gap-2">
-                    {showOptimized ? <CheckCircle className="w-4 h-4 text-green-500"/> : (
+                    {showOptimized ? <CheckCircle className="w-4 h-4 text-green-400"/> : (
                         borderClass === 'border-l-red-500' ? <XCircle className="w-4 h-4 text-red-500"/> : <Zap className="w-4 h-4 text-amber-500"/>
                     )}
-                    <span className={`text-[10px] font-bold tracking-wider uppercase ${showOptimized ? 'text-green-700' : (borderClass === 'border-l-red-500' ? 'text-red-700' : 'text-amber-700')}`}>
+                    <span className={`text-[10px] font-bold tracking-wider uppercase ${showOptimized ? 'text-green-400' : (borderClass === 'border-l-red-500' ? 'text-red-400' : 'text-amber-400')}`}>
                         {showOptimized ? 'Optimized Suggestion' : 'Identified Issue'}
                     </span>
                 </div>
                 <button 
                     onClick={() => setShowOptimized(!showOptimized)}
-                    className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-blue-600 transition-colors px-2 py-1 rounded border border-slate-200"
+                    className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-gray-500 hover:text-indigo-400 transition-colors px-2 py-1 rounded border border-gray-700"
                 >
                     <ArrowRightLeft className="w-3 h-3" />
                     {showOptimized ? 'See Original' : 'See Optimized'}
@@ -120,12 +120,12 @@ const CritiqueCard = ({ qs }) => {
             <div className="p-4">
                 {showOptimized ? (
                     <div className="p-1">
-                        <p className="text-[13px] text-green-900 leading-relaxed font-bold">"{qs.fix}"</p>
+                        <p className="text-[13px] text-green-300 leading-relaxed font-bold">"{qs.fix}"</p>
                     </div>
                 ) : (
                     <div className="p-1">
-                        <p className={`text-[13px] leading-relaxed font-medium ${borderClass === 'border-l-red-500' ? 'text-red-900' : 'text-amber-900'}`}>"{qs.sentence}"</p>
-                        <div className={`mt-3 inline-flex text-[10px] font-bold px-2 py-0.5 rounded-full border ${borderClass === 'border-l-red-500' ? 'text-red-600 border-red-100 bg-red-50' : 'text-amber-700 border-amber-100 bg-amber-50'}`}>
+                        <p className={`text-[13px] leading-relaxed font-medium ${borderClass === 'border-l-red-500' ? 'text-red-300' : 'text-amber-300'}`}>"{qs.sentence}"</p>
+                        <div className={`mt-3 inline-flex text-[10px] font-bold px-2 py-0.5 rounded-full border ${borderClass === 'border-l-red-500' ? 'text-red-400 border-red-500/20 bg-red-500/10' : 'text-amber-400 border-amber-500/20 bg-amber-500/10'}`}>
                             {qs.issue || 'Opportunity for Improvement'}
                         </div>
                     </div>
@@ -142,15 +142,15 @@ const ChecklistRow = ({ icon: Icon, label, statusName, isComplete }) => {
     const [expanded, setExpanded] = useState(false);
     
     return (
-        <div className="flex flex-col border border-slate-100 rounded-md bg-slate-50 overflow-hidden cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => !isComplete && setExpanded(!expanded)}>
+        <div className="flex flex-col border border-gray-700/50 rounded-md bg-gray-800/50 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors" onClick={() => !isComplete && setExpanded(!expanded)}>
             <div className="flex justify-between items-center p-3">
-                <div className="flex items-center gap-3 text-sm font-bold text-slate-700">
-                    <Icon className="w-4 h-4 text-slate-400"/> {label}
+                <div className="flex items-center gap-3 text-sm font-bold text-gray-300">
+                    <Icon className="w-4 h-4 text-gray-500"/> {label}
                 </div>
                 {isComplete ? (
-                    <CheckCircle className="w-4 h-4 text-green-600"/>
+                    <CheckCircle className="w-4 h-4 text-green-400"/>
                 ) : (
-                    <XCircle className="w-4 h-4 text-red-600"/>
+                    <XCircle className="w-4 h-4 text-red-400"/>
                 )}
             </div>
             <AnimatePresence>
@@ -159,7 +159,7 @@ const ChecklistRow = ({ icon: Icon, label, statusName, isComplete }) => {
                         initial={{ height: 0, opacity: 0 }} 
                         animate={{ height: 'auto', opacity: 1 }} 
                         exit={{ height: 0, opacity: 0 }}
-                        className="px-3 pb-3 pt-1 text-xs text-red-600 font-medium"
+                        className="px-3 pb-3 pt-1 text-xs text-red-400 font-medium"
                     >
                         Please add your missing {statusName} to improve your score.
                     </motion.div>
@@ -174,22 +174,22 @@ const ChecklistRow = ({ icon: Icon, label, statusName, isComplete }) => {
 // ==========================================
 const DetailCard = ({ id, title, icon: Icon, isPass, issueText, explanation, suggestion, children }) => (
     <div id={id} className="scroll-mt-28 mb-10 group">
-        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Icon className={`w-6 h-6 ${isPass ? 'text-green-500' : 'text-red-500'}`} /> {title}
+        <h2 className="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
+            <Icon className={`w-6 h-6 ${isPass ? 'text-green-400' : 'text-red-500'}`} /> {title}
         </h2>
-        <div className={`border border-slate-200 rounded-xl p-6 md:p-8 bg-white shadow-sm border-t-4 transition-shadow hover:shadow-md ${isPass ? 'border-t-green-500' : 'border-t-red-500'}`}>
+        <div className={`border border-gray-700 rounded-xl p-6 md:p-8 bg-gray-800/40 backdrop-blur-md shadow-sm border-t-4 transition-shadow hover:shadow-md ${isPass ? 'border-t-green-500' : 'border-t-red-500'}`}>
             <div className="flex justify-between items-start mb-4">
-                <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${isPass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${isPass ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                     {issueText}
                 </span>
             </div>
-            {explanation && <p className="text-slate-600 text-sm mb-5 leading-relaxed font-medium">{explanation}</p>}
+            {explanation && <p className="text-gray-400 text-sm mb-5 leading-relaxed font-medium">{explanation}</p>}
             {!isPass && suggestion && (
-                <div className="bg-slate-50 border border-slate-100 rounded-lg p-5 mb-5">
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <div className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-5 mb-5">
+                    <h4 className="text-xs font-bold text-gray-100 uppercase tracking-wider mb-2 flex items-center gap-2">
                         <Zap className="w-4 h-4 text-amber-500"/> How to fix this
                     </h4>
-                    <p className="text-[13px] text-slate-600 font-medium leading-relaxed">{suggestion}</p>
+                    <p className="text-[13px] text-gray-400 font-medium leading-relaxed">{suggestion}</p>
                 </div>
             )}
             {children && (
@@ -387,9 +387,9 @@ export default function Dashboard() {
     const quantScore = (quantificationSuggestions?.length < 3) ? 85 : 40;
 
     const getBadgeStyle = (score) => {
-        if (score >= 80) return 'text-green-600 bg-green-50 border-green-100';
-        if (score >= 50) return 'text-amber-600 bg-amber-50 border-amber-100';
-        return 'text-red-600 bg-red-50 border-red-100';
+        if (score >= 80) return 'text-green-400 bg-green-500/10 border-green-500/20';
+        if (score >= 50) return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+        return 'text-red-400 bg-red-500/10 border-red-500/20';
     };
 
     const categoryDetails = {
@@ -400,13 +400,13 @@ export default function Dashboard() {
                 {Array.isArray(repetition_errors) && repetition_errors.length > 0 ? (
                     <ul className="space-y-2 mt-2">
                         {repetition_errors.map((err, i) => (
-                            <li key={i} className="bg-red-50/50 p-3 rounded-lg border border-red-100 flex flex-col">
-                                <span className="font-bold text-slate-700">{err}</span>
-                                <span className="text-[11px] text-slate-500 mt-1">Try using synonyms or restructuring sentences to avoid sounding repetitive.</span>
+                            <li key={i} className="bg-red-500/10 p-3 rounded-lg border border-red-500/20 flex flex-col">
+                                <span className="font-bold text-gray-300">{err}</span>
+                                <span className="text-[11px] text-gray-400 mt-1">Try using synonyms or restructuring sentences to avoid sounding repetitive.</span>
                             </li>
                         ))}
                     </ul>
-                ) : <p className="text-green-600 font-bold flex gap-1"><CheckCircle className="w-4 h-4"/> No excessive repetition detected.</p>}
+                ) : <p className="text-green-400 font-bold flex gap-1"><CheckCircle className="w-4 h-4"/> No excessive repetition detected.</p>}
             </>
         ),
         'quantifying-impact': (
@@ -414,14 +414,14 @@ export default function Dashboard() {
                 <p className="mb-3">Recruiters expect to see quantifiable metrics ($, %, counts) to understand the scale of your impact.</p>
                 {Array.isArray(quantificationSuggestions) && quantificationSuggestions.length > 0 ? (
                     <div className="space-y-3">{quantificationSuggestions.map((qs, i) => <CritiqueCard key={i} qs={qs} />)}</div>
-                ) : <p className="text-green-600 font-bold flex gap-1"><CheckCircle className="w-4 h-4"/> Great job quantifying your bullets.</p>}
+                ) : <p className="text-green-400 font-bold flex gap-1"><CheckCircle className="w-4 h-4"/> Great job quantifying your bullets.</p>}
             </>
         ),
         'spelling-grammar': (
             <>
                 <p className="mb-2">Simple typos can instantly disqualify you from competitive roles.</p>
                 {Array.isArray(spelling_errors) && spelling_errors.length > 0 && (
-                    <ul className="space-y-2 mt-2">{spelling_errors.map((err, i) => <li key={i} className="bg-red-50/50 p-3 rounded-lg border border-red-100 flex flex-col"><span className="font-bold text-slate-700">Error: <span className="text-red-600">{err?.word}</span></span><span className="font-bold flex gap-1 mt-1 text-slate-700"><ArrowRightLeft className="w-3 h-3 text-slate-400"/> Suggestion: <span className="text-green-600">{err?.suggestion}</span></span></li>)}</ul>
+                    <ul className="space-y-2 mt-2">{spelling_errors.map((err, i) => <li key={i} className="bg-red-500/10 p-3 rounded-lg border border-red-500/20 flex flex-col"><span className="font-bold text-gray-300">Error: <span className="text-red-400">{err?.word}</span></span><span className="font-bold flex gap-1 mt-1 text-gray-300"><ArrowRightLeft className="w-3 h-3 text-gray-500"/> Suggestion: <span className="text-green-400">{err?.suggestion}</span></span></li>)}</ul>
                 )}
             </>
         ),
@@ -444,8 +444,8 @@ export default function Dashboard() {
             <>
                 <p className="mb-4">We mapped your technical skills directly to the Job Description required skills.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-green-600"/> Found</h4><div className="flex flex-wrap gap-2">{Array.isArray(matchedSkills) && matchedSkills.length > 0 ? matchedSkills.map(skill => <span key={skill} className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-bold border border-green-100">{skill?.toUpperCase()}</span>) : <span className="text-slate-400 text-xs font-medium">None found.</span>}</div></div>
-                    <div><h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1.5"><XCircle className="w-3 h-3 text-red-600"/> Missing</h4><div className="flex flex-wrap gap-2">{Array.isArray(missingSkills) && missingSkills.length > 0 ? missingSkills.map(skill => <span key={skill} className="px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-bold border border-red-100">{skill?.toUpperCase()}</span>) : <span className="text-green-600 text-xs font-bold">Perfect match!</span>}</div></div>
+                    <div><h4 className="text-[10px] font-bold text-gray-500 uppercase mb-2 flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-green-400"/> Found</h4><div className="flex flex-wrap gap-2">{Array.isArray(matchedSkills) && matchedSkills.length > 0 ? matchedSkills.map(skill => <span key={skill} className="px-2 py-1 bg-green-500/10 text-green-400 rounded text-xs font-bold border border-green-500/20">{skill?.toUpperCase()}</span>) : <span className="text-gray-500 text-xs font-medium">None found.</span>}</div></div>
+                    <div><h4 className="text-[10px] font-bold text-gray-500 uppercase mb-2 flex items-center gap-1.5"><XCircle className="w-3 h-3 text-red-400"/> Missing</h4><div className="flex flex-wrap gap-2">{Array.isArray(missingSkills) && missingSkills.length > 0 ? missingSkills.map(skill => <span key={skill} className="px-2 py-1 bg-red-500/10 text-red-400 rounded text-xs font-bold border border-red-500/20">{skill?.toUpperCase()}</span>) : <span className="text-green-400 text-xs font-bold">Perfect match!</span>}</div></div>
                 </div>
             </>
         ),
@@ -456,33 +456,33 @@ export default function Dashboard() {
 
     // Step 3: Update UI
     return (
-        <div className="min-h-screen bg-white text-slate-800 font-sans antialiased overflow-y-auto custom-scrollbar flex">
+        <div className="min-h-screen w-full bg-gray-900 text-gray-100 font-sans antialiased overflow-y-auto custom-scrollbar flex">
             
             {/* LEFT SIDEBAR */}
-            <div className="w-72 shrink-0 border-r border-slate-100 bg-white min-h-screen h-full fixed top-[72px] left-0 overflow-y-auto p-6 flex flex-col hidden lg:flex">
+            <div className="w-72 shrink-0 border-r border-gray-700/50 bg-gray-900 min-h-screen h-full fixed top-[72px] left-0 overflow-y-auto p-6 flex flex-col hidden lg:flex">
                 
                 {/* Score Gauge */}
-                <div className="flex flex-col items-center border-b border-slate-100 pb-8 mb-6">
+                <div className="flex flex-col items-center border-b border-gray-700/50 pb-8 mb-6">
                     <ScoreRing calculatedScore={finalScore} scanPhase={scanPhase} />
                     <div className="flex gap-4">
                         <div className="text-center">
-                            <span className="block text-slate-900 font-black text-lg">{scanPhase >= 3 ? safeWordCount : 0}</span>
-                            <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold">Words</span>
+                            <span className="block text-gray-100 font-black text-lg">{scanPhase >= 3 ? safeWordCount : 0}</span>
+                            <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Words</span>
                         </div>
-                        <div className="w-px bg-slate-100 h-8"></div>
+                        <div className="w-px bg-gray-700 h-8"></div>
                         <div className="text-center">
-                            <span className="block text-slate-900 font-black text-lg">{scanPhase >= 3 ? readingTime : 0}</span>
-                            <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold">Minutes</span>
+                            <span className="block text-gray-100 font-black text-lg">{scanPhase >= 3 ? readingTime : 0}</span>
+                            <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Minutes</span>
                         </div>
                     </div>
                 </div>
 
                 {/* 1. Score Breakdown Gauges */}
-                <div className="bg-[#f8fafc] rounded-lg p-6 mb-8 border border-slate-100">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-1.5">
+                <div className="bg-[#f8fafc] rounded-lg p-6 mb-8 border border-gray-700/50">
+                    <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-1.5">
                         <Activity className="w-3 h-3 text-blue-500"/> Performance Metrics
                     </h3>
-                    <ProgressBar label="ATS Connectivity" percentage={ats_compatibility || 0} colorClass="bg-blue-600" />
+                    <ProgressBar label="ATS Connectivity" percentage={ats_compatibility || 0} colorClass="bg-indigo-600" />
                     <ProgressBar label="Content Quality" percentage={content_quality || 0} colorClass="bg-green-600" />
                     <ProgressBar label="Formatting" percentage={formatting_score || 0} colorClass="bg-amber-600" />
                     <ProgressBar label="Online Presence" percentage={linkedin_presence || 0} colorClass="bg-purple-600" />
@@ -493,19 +493,19 @@ export default function Dashboard() {
                     {sidebarData.map((section) => {
                         const isExpanded = expandedSections[section.id];
                         return (
-                            <div key={section.id} className="border-b border-slate-100 last:border-0 pb-1">
+                            <div key={section.id} className="border-b border-gray-700/50 last:border-0 pb-1">
                                 <button
                                     onClick={() => toggleSection(section.id)}
-                                    className="w-full flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg group transition-colors focus:outline-none"
+                                    className="w-full flex items-center justify-between p-2 hover:bg-gray-800/50 rounded-lg group transition-colors focus:outline-none"
                                 >
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 group-hover:text-blue-600">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-indigo-400">
                                         {section.title}
                                     </span>
                                     <div className="flex items-center gap-2">
                                         <div className={`px-2 py-0.5 rounded flex items-center justify-center text-[9px] font-black border ${getBadgeStyle(section.score)}`}>
                                             {section.score}%
                                         </div>
-                                        <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-300 ${isExpanded ? 'transform rotate-180' : ''}`} />
+                                        <ChevronDown className={`w-3 h-3 text-gray-500 transition-transform duration-300 ${isExpanded ? 'transform rotate-180' : ''}`} />
                                     </div>
                                 </button>
                                 
@@ -518,19 +518,19 @@ export default function Dashboard() {
                                                     key={item.id}
                                                     onClick={() => handleItemClick(item.id)}
                                                     className={`flex items-start gap-2 w-full text-left p-1.5 rounded-md transition-colors ${
-                                                        isActive ? 'bg-blue-50/60' : 'hover:bg-slate-50'
+                                                        isActive ? 'bg-indigo-500/10' : 'hover:bg-gray-800/50'
                                                     }`}
                                                 >
                                                     {item.isPass ? (
-                                                        <CheckCircle className="w-3 h-3 text-green-500 mt-0.5 shrink-0" />
+                                                        <CheckCircle className="w-3 h-3 text-green-400 mt-0.5 shrink-0" />
                                                     ) : (
                                                         <XCircle className="w-3 h-3 text-red-500 mt-0.5 shrink-0" />
                                                     )}
                                                     <div className="flex flex-col">
-                                                        <span className={`text-[10px] font-bold ${isActive ? 'text-blue-700' : 'text-slate-600'}`}>
+                                                        <span className={`text-[10px] font-bold ${isActive ? 'text-indigo-300' : 'text-gray-400'}`}>
                                                             {item.label}
                                                         </span>
-                                                        <span className={`text-[9px] ${item.isPass ? 'text-slate-400' : 'text-red-500 font-bold'}`}>
+                                                        <span className={`text-[9px] ${item.isPass ? 'text-gray-500' : 'text-red-500 font-bold'}`}>
                                                             {item.message}
                                                         </span>
                                                     </div>
@@ -545,9 +545,9 @@ export default function Dashboard() {
                 </div>
 
                 {/* Audit Progress Box */}
-                <div className="mt-auto bg-[#f8fafc] rounded-lg p-4 border border-slate-100">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                        {scanPhase < 4 ? <Loader2 className="w-3 h-3 animate-spin"/> : <Activity className="w-3 h-3 text-green-500"/>}
+                <div className="mt-auto bg-[#f8fafc] rounded-lg p-4 border border-gray-700/50">
+                    <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                        {scanPhase < 4 ? <Loader2 className="w-3 h-3 animate-spin"/> : <Activity className="w-3 h-3 text-green-400"/>}
                         Audit Progress
                     </h3>
                     <div className="space-y-3">
@@ -557,19 +557,19 @@ export default function Dashboard() {
                             
                             return (
                                 <div key={idx} className={`flex items-center justify-between transition-opacity duration-500 ${isPast || isActive ? 'opacity-100' : 'opacity-30'}`}>
-                                    <span className={`text-[11px] font-bold ${isPast ? 'text-slate-600' : isActive ? 'text-blue-600' : 'text-slate-400'}`}>
+                                    <span className={`text-[11px] font-bold ${isPast ? 'text-gray-400' : isActive ? 'text-indigo-400' : 'text-gray-500'}`}>
                                         Step {idx + 1}
                                     </span>
                                     <div className="shrink-0 flex items-center gap-2">
-                                        <span className={`text-[9px] uppercase tracking-wider font-bold ${isPast ? 'text-slate-500' : isActive ? 'text-blue-600' : 'text-slate-400'}`}>
+                                        <span className={`text-[9px] uppercase tracking-wider font-bold ${isPast ? 'text-gray-400' : isActive ? 'text-indigo-400' : 'text-gray-500'}`}>
                                             {isPast ? 'Complete' : isActive ? 'Scanning' : 'Pending'}
                                         </span>
                                         {isPast ? (
-                                            step.aspect ? <CheckCircle className="text-green-600 w-3 h-3"/> : <Zap className="text-amber-500 w-3 h-3"/>
+                                            step.aspect ? <CheckCircle className="text-green-400 w-3 h-3"/> : <Zap className="text-amber-500 w-3 h-3"/>
                                         ) : isActive ? (
                                             <Loader2 className="text-blue-500 w-3 h-3 animate-spin"/>
                                         ) : (
-                                            <Circle className="text-slate-300 w-3 h-3"/>
+                                            <Circle className="text-gray-600 w-3 h-3"/>
                                         )}
                                     </div>
                                 </div>
@@ -584,17 +584,17 @@ export default function Dashboard() {
             <div className="flex-1 lg:ml-72 mt-[72px] px-6 lg:px-12 py-8 max-w-5xl">
                 
                 {/* Professional Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 pb-6 border-b border-slate-100">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 pb-6 border-b border-gray-700/50">
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Full Diagnostic Audit</h1>
-                        <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-wider">Targeting: {suggestedRoles?.[0] || 'Software Professional'}</p>
+                        <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 tracking-tight">Full Diagnostic Audit</h1>
+                        <p className="text-sm font-bold text-gray-400 mt-1 uppercase tracking-wider">Targeting: {suggestedRoles?.[0] || 'Software Professional'}</p>
                     </div>
                     <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-center gap-3">
                         <motion.button 
                             whileHover={{ y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => { setEditedText(rawResumeText); setIsEditingMode(true); }} 
-                            className={`flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm shadow-blue-500/30 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                            className={`flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-500/25 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                         >
                             <PenTool className="w-4 h-4" /> Live Edit
                         </motion.button>
@@ -602,7 +602,7 @@ export default function Dashboard() {
                             whileHover={{ y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={handleDownload} 
-                            className={`flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm border border-slate-200 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                            className={`flex items-center justify-center gap-2 bg-gray-800/40 backdrop-blur-md hover:bg-gray-800/50 text-gray-300 py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm border border-gray-700 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                         >
                             <FileDown className="w-4 h-4" /> Download PDF <Crown className="w-3 h-3 text-amber-500"/>
                         </motion.button>
@@ -612,18 +612,18 @@ export default function Dashboard() {
                 {/* Engaging Laser Scanner Animation while scanPhase < 4 */}
                 {scanPhase < 4 && (
                     <div className="space-y-6 lg:max-w-[700px] xl:max-w-none">
-                        <div className="bg-white border border-slate-200 rounded-3xl p-12 flex flex-col items-center justify-center shadow-sm relative overflow-hidden min-h-[400px]">
+                        <div className="bg-gray-800/40 backdrop-blur-md border border-gray-700 rounded-3xl p-12 flex flex-col items-center justify-center shadow-sm relative overflow-hidden min-h-[400px]">
                             {/* Futuristic Background Gradients */}
-                            <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: 'linear' }} className="absolute -left-20 -top-20 w-64 h-64 bg-blue-400/10 blur-3xl rounded-full" />
-                            <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: 'linear' }} className="absolute -right-20 -bottom-20 w-80 h-80 bg-cyan-400/10 blur-3xl rounded-full" />
+                            <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: 'linear' }} className="absolute -left-20 -top-20 w-64 h-64 bg-indigo-500/20 blur-3xl rounded-full" />
+                            <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: 'linear' }} className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/20 blur-3xl rounded-full" />
                             
                             {/* Document Scanner Graphic */}
-                            <div className="relative w-28 h-40 bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden flex flex-col items-center justify-center shadow-inner z-10 mb-8">
-                                <FileText className="w-12 h-12 text-slate-300 mb-2" />
+                            <div className="relative w-28 h-40 bg-gray-800/50 border-2 border-gray-700 rounded-xl overflow-hidden flex flex-col items-center justify-center shadow-inner z-10 mb-8">
+                                <FileText className="w-12 h-12 text-gray-600 mb-2" />
                                 <div className="space-y-1.5 w-16">
-                                    <div className="h-1 bg-slate-200 rounded w-full"></div>
-                                    <div className="h-1 bg-slate-200 rounded w-5/6"></div>
-                                    <div className="h-1 bg-slate-200 rounded w-4/6"></div>
+                                    <div className="h-1 bg-gray-600 rounded w-full"></div>
+                                    <div className="h-1 bg-gray-600 rounded w-5/6"></div>
+                                    <div className="h-1 bg-gray-600 rounded w-4/6"></div>
                                 </div>
                                 
                                 {/* The Laser */}
@@ -643,7 +643,7 @@ export default function Dashboard() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -20 }}
                                         transition={{ duration: 0.3 }}
-                                        className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 absolute"
+                                        className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 absolute"
                                     >
                                         {scanPhase === 0 && "Verifying Contact Identity..."}
                                         {scanPhase === 1 && "Validating Section Integrity..."}
@@ -653,16 +653,16 @@ export default function Dashboard() {
                                 </AnimatePresence>
                             </div>
                             
-                            <p className="text-slate-400 text-sm font-bold mt-3 uppercase tracking-widest z-10 flex items-center gap-2">
-                                <Loader2 className="w-4 h-4 animate-spin text-slate-400"/> Processing
+                            <p className="text-gray-500 text-sm font-bold mt-3 uppercase tracking-widest z-10 flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin text-gray-500"/> Processing
                             </p>
                         </div>
                         
                         {/* Smaller skeleton below the scanner to fill space pleasantly */}
-                        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm opacity-50 animate-pulse hidden sm:block">
-                            <div className="h-4 bg-slate-100 rounded-full w-1/3 mb-4"></div>
-                            <div className="h-3 bg-slate-50 rounded-full w-full mb-2"></div>
-                            <div className="h-3 bg-slate-50 rounded-full w-5/6"></div>
+                        <div className="bg-gray-800/40 backdrop-blur-md p-6 rounded-3xl border border-gray-700/50 shadow-sm opacity-50 animate-pulse hidden sm:block">
+                            <div className="h-4 bg-gray-700 rounded-full w-1/3 mb-4"></div>
+                            <div className="h-3 bg-gray-800/50 rounded-full w-full mb-2"></div>
+                            <div className="h-3 bg-gray-800/50 rounded-full w-5/6"></div>
                         </div>
                     </div>
                 )}
@@ -671,31 +671,31 @@ export default function Dashboard() {
                     
                     <div className="flex flex-col gap-10 mb-16 scroll-mt-28">
                         {sidebarData.map(category => (
-                            <div id={category.id} key={category.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                                <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-                                    <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                                        <Layout className="w-5 h-5 text-slate-400"/> {category.title}
+                            <div id={category.id} key={category.id} className="bg-gray-800/40 backdrop-blur-md rounded-2xl shadow-sm border border-gray-700 overflow-hidden flex flex-col">
+                                <div className="px-6 py-5 border-b border-gray-700/50 bg-gray-800/30">
+                                    <h2 className="text-sm font-black text-gray-100 uppercase tracking-widest flex items-center gap-2">
+                                        <Layout className="w-5 h-5 text-gray-500"/> {category.title}
                                     </h2>
                                 </div>
                                 <div className="flex flex-col">
                                     {category.items.map((item, index) => {
-                                        let badgeColors = 'bg-red-50 text-red-600 border border-red-100';
-                                        if (item.isPass) badgeColors = 'bg-green-50 text-green-600 border border-green-100';
+                                        let badgeColors = 'bg-red-500/10 text-red-400 border border-red-500/20';
+                                        if (item.isPass) badgeColors = 'bg-green-500/10 text-green-400 border border-green-500/20';
                                         else if (item.message === 'Needs improvement' || item.message.includes('issues')) {
                                             if (item.message === 'Needs improvement') badgeColors = 'bg-yellow-50 text-yellow-600 border border-yellow-100';
                                         }
                                         return (
-                                            <div id={item.id} key={item.id} className={`flex flex-col px-6 py-5 hover:bg-slate-50 transition-colors scroll-mt-28 ${index !== category.items.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                                            <div id={item.id} key={item.id} className={`flex flex-col px-6 py-5 hover:bg-gray-800/50 transition-colors scroll-mt-28 ${index !== category.items.length - 1 ? 'border-b border-gray-700/50' : ''}`}>
                                                 <div className="flex flex-row items-center justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        {item.isPass ? <CheckCircle className="w-5 h-5 text-green-500 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />}
-                                                        <span className="text-base font-bold text-slate-800">{item.label}</span>
+                                                        {item.isPass ? <CheckCircle className="w-5 h-5 text-green-400 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />}
+                                                        <span className="text-base font-bold text-gray-100">{item.label}</span>
                                                     </div>
                                                     <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${badgeColors}`}>
                                                         {item.message || (item.isPass ? 'No issues' : 'Needs Work')}
                                                     </span>
                                                 </div>
-                                                <div className="ml-8 mt-4 text-[13px] text-slate-600 leading-relaxed font-medium">
+                                                <div className="ml-8 mt-4 text-[13px] text-gray-400 leading-relaxed font-medium">
                                                     {categoryDetails[item.id]}
                                                 </div>
                                             </div>
@@ -708,16 +708,16 @@ export default function Dashboard() {
 
                     {/* Actionable Re-upload Footer */}
                     <div className="mt-8 mb-20">
-                        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-8 sm:p-10 shadow-lg shadow-blue-900/10 text-center flex flex-col items-center justify-center border border-blue-500/30 relative overflow-hidden">
+                        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 sm:p-10 shadow-lg shadow-blue-900/10 text-center flex flex-col items-center justify-center border border-gray-700/50 relative overflow-hidden">
                             {/* Decorative background elements */}
-                            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
-                            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
+                            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gray-800/40 backdrop-blur-md opacity-5 rounded-full blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-gray-800/40 backdrop-blur-md opacity-5 rounded-full blur-2xl"></div>
                             
-                            <Crown className="w-12 h-12 text-blue-200 mb-4 relative z-10" />
+                            <Crown className="w-12 h-12 text-indigo-400 mb-4 relative z-10" />
                             <h2 className="text-2xl font-black text-white tracking-tight mb-2 relative z-10">
                                 Make your edits & try again!
                             </h2>
-                            <p className="text-blue-100 text-sm font-medium max-w-md mx-auto mb-8 relative z-10 leading-relaxed">
+                            <p className="text-gray-300 text-sm font-medium max-w-md mx-auto mb-8 relative z-10 leading-relaxed">
                                 Our analyzer acts identically to a corporate ATS. Improve the identified issues manually and re-analyze your updated resume to ensure an ascending Nexus Score.
                             </p>
                             
@@ -725,7 +725,7 @@ export default function Dashboard() {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => { setEditedText(rawResumeText); setIsEditingMode(true); }}
-                                className="relative z-10 flex items-center gap-3 bg-white text-blue-700 hover:text-blue-800 transition-colors px-8 py-4 rounded-xl font-black shadow-xl shadow-blue-900/20 text-sm uppercase tracking-wider"
+                                className="relative z-10 flex items-center gap-3 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 backdrop-blur-md hover:text-blue-800 transition-colors px-8 py-4 rounded-xl font-black shadow-xl shadow-blue-900/20 text-sm uppercase tracking-wider"
                             >
                                 <PenTool className="w-5 h-5" />
                                 Edit Resume Live
@@ -744,29 +744,29 @@ export default function Dashboard() {
                     >
                         <motion.div 
                             initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
-                            className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-full flex flex-col overflow-hidden border border-slate-200"
+                            className="bg-gray-800/40 backdrop-blur-md rounded-2xl shadow-xl w-full max-w-4xl max-h-full flex flex-col overflow-hidden border border-gray-700"
                         >
-                            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <div className="px-6 py-4 border-b border-gray-700/50 flex justify-between items-center bg-gray-800/50">
                                 <div>
-                                    <h2 className="text-lg font-black text-slate-900 flex items-center gap-2"><Type className="w-5 h-5 text-blue-600"/> In-Browser Live Editor</h2>
-                                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-1">Make direct text changes to bypass the ATS parser instantly</p>
+                                    <h2 className="text-lg font-black text-gray-100 flex items-center gap-2"><Type className="w-5 h-5 text-indigo-400"/> In-Browser Live Editor</h2>
+                                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-1">Make direct text changes to bypass the ATS parser instantly</p>
                                 </div>
-                                <button onClick={() => setIsEditingMode(false)} className="text-slate-400 hover:text-red-500 transition-colors p-1"><XCircle className="w-6 h-6"/></button>
+                                <button onClick={() => setIsEditingMode(false)} className="text-gray-500 hover:text-red-500 transition-colors p-1"><XCircle className="w-6 h-6"/></button>
                             </div>
-                            <div className="p-0 flex-1 overflow-hidden flex flex-col bg-white">
+                            <div className="p-0 flex-1 overflow-hidden flex flex-col bg-gray-800/40 backdrop-blur-md">
                                 <textarea 
                                     value={editedText || ''}
                                     onChange={(e) => setEditedText(e.target.value)}
-                                    className="w-full h-[50vh] sm:h-[60vh] p-6 focus:outline-none transition-colors font-mono text-sm leading-relaxed text-slate-700 bg-white resize-none"
+                                    className="w-full h-[50vh] sm:h-[60vh] p-6 focus:outline-none transition-colors font-mono text-sm leading-relaxed text-gray-300 bg-gray-800/40 backdrop-blur-md resize-none"
                                     placeholder="Your extracted resume text will appear here. Making changes here simulates an immediate PDF re-upload..."
                                 />
                             </div>
-                            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
-                                <button onClick={() => setIsEditingMode(false)} className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 hover:bg-slate-200 transition-colors border border-slate-200">Cancel</button>
+                            <div className="px-6 py-4 border-t border-gray-700/50 flex justify-end gap-3 bg-gray-800/50">
+                                <button onClick={() => setIsEditingMode(false)} className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-gray-400 hover:bg-gray-600 transition-colors border border-gray-700">Cancel</button>
                                 <button 
                                     onClick={handleRescan}
                                     disabled={isRescanning}
-                                    className="px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm shadow-blue-500/30 disabled:opacity-50"
+                                    className="px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-500 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/25 disabled:opacity-50"
                                 >
                                     {isRescanning ? <Loader2 className="w-4 h-4 animate-spin"/> : <Zap className="w-4 h-4"/>}
                                     {isRescanning ? 'Analyzing...' : 'Execute Live Rescan'}

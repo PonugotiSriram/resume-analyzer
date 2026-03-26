@@ -20,6 +20,30 @@ KNOWN_SKILLS = set([
     "html", "css", "machine learning", "nlp", "flask", "django", "typescript", "figma", "pandas"
 ])
 
+# Custom Dictionary of 20 common resume spelling mistakes
+COMMON_MISSPELLINGS = {
+    "achievment": "achievement",
+    "proffessional": "professional",
+    "accomodate": "accommodate",
+    "recieve": "receive",
+    "seperate": "separate",
+    "aquire": "acquire",
+    "reccomend": "recommend",
+    "experiance": "experience",
+    "maintainance": "maintenance",
+    "calender": "calendar",
+    "enviroment": "environment",
+    "goverment": "government",
+    "sucessful": "successful",
+    "optomize": "optimize",
+    "impelement": "implement",
+    "devlopment": "development",
+    "stratagy": "strategy",
+    "responsabilities": "responsibilities",
+    "managment": "management",
+    "knowlege": "knowledge"
+}
+
 def get_ai_recommendation(bullet_text):
     text_lower = bullet_text.lower()
     if 'summary' in text_lower or 'objective' in text_lower or 'experienced' in text_lower or 'driven' in text_lower:
@@ -71,6 +95,13 @@ def analyze_resume():
         return jsonify({"error": "No data provided"}), 400
 
     resume_text = data.get('resume_text', '')
+    
+    # Text Cleaning
+    # Remove awkward PDF artifacts and special non-resume characters, keeping basic punctuation
+    resume_text = re.sub(r'[^\w\s.,!?;:\'-]', ' ', resume_text)
+    # Remove extra spaces completely
+    resume_text = re.sub(r'\s+', ' ', resume_text).strip()
+    
     job_description = data.get('job_description', '')
     linkedin_url = data.get('linkedin_url', '')
     company = data.get('company', 'General')
@@ -95,12 +126,19 @@ def analyze_resume():
 
     # 3. Spell Check
     spelling_errors = []
+    
+    # Custom Dictionary Scan Logic (Before main NLP)
+    words_in_text = re.findall(r'\b[a-zA-Z]+\b', resume_text.lower())
+    for word in words_in_text:
+        if word in COMMON_MISSPELLINGS:
+            if not any(e['word'] == word for e in spelling_errors):
+                spelling_errors.append({"word": word, "suggestion": COMMON_MISSPELLINGS[word]})
+                
     if spell:
-        words_to_check = re.findall(r'\b[a-zA-Z]+\b', resume_text)
-        words_to_check = [w.lower() for w in words_to_check if w.lower() not in KNOWN_SKILLS and len(w) > 2]
+        words_to_check = [w for w in words_in_text if w not in KNOWN_SKILLS and len(w) > 2]
         misspelled = spell.unknown(words_to_check)
         
-        errors_found = 0
+        errors_found = len(spelling_errors)
         for word in misspelled:
             if errors_found >= 5: 
                 break
