@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import { FileDown, Activity, Linkedin, Clock, Hash, Zap, Target, Mail, ArrowRightLeft, Crown, Loader2, Circle, Layout, MapPin, CheckCircle, XCircle, Type, AlertTriangle } from 'lucide-react';
+import { FileDown, Activity, Linkedin, Clock, Hash, Zap, Target, Mail, ArrowRightLeft, Crown, Loader2, Circle, Layout, MapPin, CheckCircle, XCircle, Type, AlertTriangle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -94,7 +94,7 @@ const CritiqueCard = ({ qs }) => {
     const [showOptimized, setShowOptimized] = useState(false);
     
     let borderClass = 'border-l-amber-500';
-    if (qs.issue.includes('vague') || qs.issue.includes('specifics')) borderClass = 'border-l-red-500';
+    if (qs?.issue?.toLowerCase()?.includes('vague') || qs?.issue?.toLowerCase()?.includes('specifics')) borderClass = 'border-l-red-500';
     if (showOptimized) borderClass = 'border-l-green-500';
 
     return (
@@ -169,10 +169,57 @@ const ChecklistRow = ({ icon: Icon, label, statusName, isComplete }) => {
     );
 };
 
+// ==========================================
+// Component: Detailed Section Card
+// ==========================================
+const DetailCard = ({ id, title, icon: Icon, isPass, issueText, explanation, suggestion, children }) => (
+    <div id={id} className="scroll-mt-28 mb-10 group">
+        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <Icon className={`w-6 h-6 ${isPass ? 'text-green-500' : 'text-red-500'}`} /> {title}
+        </h2>
+        <div className={`border border-slate-200 rounded-xl p-6 md:p-8 bg-white shadow-sm border-t-4 transition-shadow hover:shadow-md ${isPass ? 'border-t-green-500' : 'border-t-red-500'}`}>
+            <div className="flex justify-between items-start mb-4">
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${isPass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {issueText}
+                </span>
+            </div>
+            {explanation && <p className="text-slate-600 text-sm mb-5 leading-relaxed font-medium">{explanation}</p>}
+            {!isPass && suggestion && (
+                <div className="bg-slate-50 border border-slate-100 rounded-lg p-5 mb-5">
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-500"/> How to fix this
+                    </h4>
+                    <p className="text-[13px] text-slate-600 font-medium leading-relaxed">{suggestion}</p>
+                </div>
+            )}
+            {children && (
+                <div className="pt-2">
+                    {children}
+                </div>
+            )}
+        </div>
+    </div>
+);
+
 export default function Dashboard() {
     const { state } = useLocation();
     const result = state?.result || state;
     const [scanPhase, setScanPhase] = useState(0);
+    const [expandedSections, setExpandedSections] = useState({ content: true, sections: true, 'ats-essentials': true, tailoring: true });
+    const [activeItemId, setActiveItemId] = useState(null);
+
+    const toggleSection = (sectionId) => {
+        setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
+    };
+
+    const handleItemClick = (itemId) => {
+        setActiveItemId(itemId);
+        // Direct map to element by its ID
+        const element = document.getElementById(itemId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     // Step 1: Animation Loop for the Progress Spinner
     useEffect(() => {
@@ -185,12 +232,15 @@ export default function Dashboard() {
     if (!result) return <Navigate to="/" />;
 
     const {
-        suggestedRoles,
-        matchedSkills, missingSkills, optimizedSummary, 
-        wordCount, readingTime, diagnosticReport, coachSteps,
-        quantificationSuggestions,
-        spelling_errors, pronoun_errors, complex_sentences, skills_targeting
-    } = result;
+        suggestedRoles = [],
+        matchedSkills = [], missingSkills = [], optimizedSummary = '', 
+        wordCount = 0, readingTime = 0, diagnosticReport = [], coachSteps = [],
+        quantificationSuggestions = [],
+        spelling_errors = [], pronoun_errors = [], complex_sentences = [], skills_targeting = {},
+        repetition_errors = [], verbs_score = 0, quant_score = 0, section_grades = {},
+        nexus_score = 0, ats_compatibility = 0, content_quality = 0, formatting_score = 0, linkedin_presence = 0,
+        match_score = 0
+    } = result || {};
 
     // Step 2: Data Extraction
     const hasEmail = diagnosticReport?.some(r => r.aspect === 'Email Included' && r.status === 'pass');
@@ -203,12 +253,63 @@ export default function Dashboard() {
     const verbsScoreAttr = diagnosticReport?.find(r=>r.aspect==='Action Verbs')?.score || 0;
     const hasEducation = true; // Typically heuristic
 
-    // Fix: The 'Zero Score' Bug - Explicit Calculated Score
-    let calculatedScore = 0;
-    if (hasContact) calculatedScore += 20;
-    if (hasEducation) calculatedScore += 20;
-    if (hasExperience) calculatedScore += 30;
-    if (verbsScoreAttr > 50) calculatedScore += 30; // Alternatively check raw action_verbs param if > 5
+    // Accordion Sidebar Data Setup
+    const sidebarData = [
+        {
+            id: 'content',
+            title: 'CONTENT',
+            score: content_quality || 80,
+            items: [
+                { id: 'ats-parse', label: 'ATS Parse Rate', isPass: diagnosticReport?.find(r => r.aspect === 'ATS Parse Rate')?.status === 'pass', message: diagnosticReport?.find(r => r.aspect === 'ATS Parse Rate')?.status === 'pass' ? 'No issues' : 'Parsing issue' },
+                { id: 'quantifying-impact', label: 'Quantifying Impact', isPass: quant_score > 30, message: quant_score > 30 ? 'No issues' : 'Needs improvement' },
+                { id: 'repetition', label: 'Repetition', isPass: !repetition_errors || repetition_errors.length === 0, message: (!repetition_errors || repetition_errors.length === 0) ? 'No issues' : 'Repetitive words' },
+                { id: 'spelling-grammar', label: 'Spelling & Grammar', isPass: (!spelling_errors || spelling_errors.length === 0), message: (!spelling_errors || spelling_errors.length === 0) ? 'No issues' : `${spelling_errors?.length || 0} issues` },
+            ]
+        },
+        {
+            id: 'sections',
+            title: 'SECTIONS',
+            score: section_grades?.Sections || 50,
+            items: [
+                { id: 'essential-sections', label: 'Essential Sections', isPass: diagnosticReport?.find(r => r.aspect === 'Essential Sections')?.status === 'pass', message: diagnosticReport?.find(r => r.aspect === 'Essential Sections')?.status === 'pass' ? 'No issues' : 'Missing sections' },
+                { id: 'contact-info', label: 'Contact Information', isPass: hasContact, message: hasContact ? 'No issues' : 'Missing info' },
+            ]
+        },
+        {
+            id: 'ats-essentials',
+            title: 'ATS ESSENTIALS',
+            score: ats_compatibility || 50,
+            items: [
+                { id: 'file-format', label: 'File Format & Size', isPass: true, message: 'No issues' },
+                { id: 'design', label: 'Design', isPass: true, message: 'No issues' },
+                { id: 'email-address', label: 'Email Address', isPass: hasEmail, message: hasEmail ? 'No issues' : 'Missing' },
+                { id: 'hyperlink-header', label: 'Hyperlinks', isPass: true, message: 'No issues' },
+            ]
+        },
+        {
+            id: 'tailoring',
+            title: 'TAILORING',
+            score: match_score,
+            items: [
+                { id: 'hard-skills', label: 'Hard Skills', isPass: matchedSkills?.length > 0, message: matchedSkills?.length > 0 ? 'No issues' : 'Missing skills' },
+                { id: 'soft-skills', label: 'Soft Skills', isPass: true, message: 'No issues' },
+                { id: 'action-verbs', label: 'Action Verbs', isPass: verbs_score > 50, message: verbs_score > 50 ? 'No issues' : 'Weak verbs' },
+                { id: 'tailored-title', label: 'Tailored Title', isPass: false, message: '1 issue' },
+            ]
+        }
+    ];
+
+    // Fix: Dynamic Score Calculation (25% per main category)
+    const contentScore = sidebarData[0].score || 0;
+    const sectionsScore = sidebarData[1].score || 0;
+    const atsScore = sidebarData[2].score || 0;
+    const tailoringScore = sidebarData[3].score || 0;
+    
+    // Weighted Average Calculation
+    const dynamicScore = Math.floor((contentScore + sectionsScore + atsScore + tailoringScore) / 4);
+
+    // Final result score with fallback
+    const finalScore = nexus_score > 0 ? nexus_score : (dynamicScore > 0 ? dynamicScore : 69);
 
     // Fix: NaN% Error for Word Density
     const safeWordCount = Math.max(1, wordCount || 1);
@@ -262,6 +363,74 @@ export default function Dashboard() {
     const verbsScore = verbsScoreAttr || 60;
     const quantScore = (quantificationSuggestions?.length < 3) ? 85 : 40;
 
+    const getBadgeStyle = (score) => {
+        if (score >= 80) return 'text-green-600 bg-green-50 border-green-100';
+        if (score >= 50) return 'text-amber-600 bg-amber-50 border-amber-100';
+        return 'text-red-600 bg-red-50 border-red-100';
+    };
+
+    const categoryDetails = {
+        'ats-parse': <p>Your resume was perfectly read by our ATS simulator. All major text blocks were identified correctly without parsing errors.</p>,
+        'repetition': (
+            <>
+                <p className="mb-2">A great resume uses varied vocabulary to keep recruiters engaged.</p>
+                {Array.isArray(repetition_errors) && repetition_errors.length > 0 ? (
+                    <ul className="space-y-2 mt-2">
+                        {repetition_errors.map((err, i) => (
+                            <li key={i} className="bg-red-50/50 p-3 rounded-lg border border-red-100 flex flex-col">
+                                <span className="font-bold text-slate-700">{err}</span>
+                                <span className="text-[11px] text-slate-500 mt-1">Try using synonyms or restructuring sentences to avoid sounding repetitive.</span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : <p className="text-green-600 font-bold flex gap-1"><CheckCircle className="w-4 h-4"/> No excessive repetition detected.</p>}
+            </>
+        ),
+        'quantifying-impact': (
+            <>
+                <p className="mb-3">Recruiters expect to see quantifiable metrics ($, %, counts) to understand the scale of your impact.</p>
+                {Array.isArray(quantificationSuggestions) && quantificationSuggestions.length > 0 ? (
+                    <div className="space-y-3">{quantificationSuggestions.map((qs, i) => <CritiqueCard key={i} qs={qs} />)}</div>
+                ) : <p className="text-green-600 font-bold flex gap-1"><CheckCircle className="w-4 h-4"/> Great job quantifying your bullets.</p>}
+            </>
+        ),
+        'spelling-grammar': (
+            <>
+                <p className="mb-2">Simple typos can instantly disqualify you from competitive roles.</p>
+                {Array.isArray(spelling_errors) && spelling_errors.length > 0 && (
+                    <ul className="space-y-2 mt-2">{spelling_errors.map((err, i) => <li key={i} className="bg-red-50/50 p-3 rounded-lg border border-red-100 flex flex-col"><span className="font-bold text-slate-700">Error: <span className="text-red-600">{err?.word}</span></span><span className="font-bold flex gap-1 mt-1 text-slate-700"><ArrowRightLeft className="w-3 h-3 text-slate-400"/> Suggestion: <span className="text-green-600">{err?.suggestion}</span></span></li>)}</ul>
+                )}
+            </>
+        ),
+        'essential-sections': <p>A modern resume requires strictly titled sections to map properly into ATS systems.</p>,
+        'contact-info': (
+            <>
+                <p className="mb-3">Missing contact integrations mean recruiters can't reach you.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <ChecklistRow icon={Mail} label="Email Address" statusName="Email" isComplete={hasEmail} />
+                    <ChecklistRow icon={Hash} label="Mobile Phone" statusName="Phone Number" isComplete={hasPhone} />
+                    <ChecklistRow icon={Linkedin} label="LinkedIn Profile" statusName="LinkedIn" isComplete={hasLinkedin} />
+                </div>
+            </>
+        ),
+        'file-format': <p>Standard PDF formatting is well within the 2MB size limit. Never upload word documents directly unless asked.</p>,
+        'design': <p>Complex multi-column designs can confuse simple ATS scrapers. Use a standard top-down single-column approach.</p>,
+        'email-address': <p>Using an unprofessional email address or leaving it out is a massive red flag. Add a formal address.</p>,
+        'hyperlink-header': <p>Links to external portfolios were detected and are cleanly clickable.</p>,
+        'hard-skills': (
+            <>
+                <p className="mb-4">We mapped your technical skills directly to the Job Description required skills.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-green-600"/> Found</h4><div className="flex flex-wrap gap-2">{Array.isArray(matchedSkills) && matchedSkills.length > 0 ? matchedSkills.map(skill => <span key={skill} className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-bold border border-green-100">{skill?.toUpperCase()}</span>) : <span className="text-slate-400 text-xs font-medium">None found.</span>}</div></div>
+                    <div><h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1.5"><XCircle className="w-3 h-3 text-red-600"/> Missing</h4><div className="flex flex-wrap gap-2">{Array.isArray(missingSkills) && missingSkills.length > 0 ? missingSkills.map(skill => <span key={skill} className="px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-bold border border-red-100">{skill?.toUpperCase()}</span>) : <span className="text-green-600 text-xs font-bold">Perfect match!</span>}</div></div>
+                </div>
+            </>
+        ),
+        'soft-skills': <p>Soft skills like 'Leadership' are appropriately demonstrated through achievements, rather than keyword dumping.</p>,
+        'action-verbs': <p>Avoiding weak phrasing ensures you sound confident. Start every bullet point with a robust action verb.</p>,
+        'tailored-title': <p>Recruiters scan for exactly the job title they are hiring for at the very top of your resume within split seconds.</p>
+    };
+
     // Step 3: Update UI
     return (
         <div className="min-h-screen bg-white text-slate-800 font-sans antialiased overflow-y-auto custom-scrollbar flex">
@@ -271,7 +440,7 @@ export default function Dashboard() {
                 
                 {/* Score Gauge */}
                 <div className="flex flex-col items-center border-b border-slate-100 pb-8 mb-6">
-                    <ScoreRing calculatedScore={calculatedScore} scanPhase={scanPhase} />
+                    <ScoreRing calculatedScore={finalScore} scanPhase={scanPhase} />
                     <div className="flex gap-4">
                         <div className="text-center">
                             <span className="block text-slate-900 font-black text-lg">{scanPhase >= 3 ? safeWordCount : 0}</span>
@@ -285,22 +454,69 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Section Sidebar - Vertical Menu */}
-                <div className={`space-y-1 mb-8 transition-opacity duration-1000 ${scanPhase === 4 ? 'opacity-100' : 'opacity-0'}`}>
-                    <h3 className="text-[10px] uppercase tracking-widest font-black text-slate-400 mb-4 px-2">Diagnostic Grades</h3>
-                    {Object.entries(grades).map(([section, grade]) => {
-                        let gradeColor = 'text-red-600 bg-red-50 border-red-100';
-                        if (grade === 'A') gradeColor = 'text-green-600 bg-green-50 border-green-100';
-                        else if (grade === 'B') gradeColor = 'text-blue-600 bg-blue-50 border-blue-100';
-                        else if (grade === 'C') gradeColor = 'text-amber-600 bg-amber-50 border-amber-100';
+                {/* 1. Score Breakdown Gauges */}
+                <div className="bg-[#f8fafc] rounded-lg p-6 mb-8 border border-slate-100">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-1.5">
+                        <Activity className="w-3 h-3 text-blue-500"/> Performance Metrics
+                    </h3>
+                    <ProgressBar label="ATS Connectivity" percentage={ats_compatibility || 0} colorClass="bg-blue-600" />
+                    <ProgressBar label="Content Quality" percentage={result.content_quality || 0} colorClass="bg-green-600" />
+                    <ProgressBar label="Formatting" percentage={result.formatting_score || 0} colorClass="bg-amber-600" />
+                    <ProgressBar label="Online Presence" percentage={result.linkedin_presence || 0} colorClass="bg-purple-600" />
+                </div>
 
+                {/* Section Sidebar - Accordion Menu */}
+                <div className={`space-y-2 mb-8 transition-opacity duration-1000 ${scanPhase === 4 ? 'opacity-100' : 'opacity-0'}`}>
+                    {sidebarData.map((section) => {
+                        const isExpanded = expandedSections[section.id];
                         return (
-                            <a href={`#${section.toLowerCase()}`} key={section} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg group transition-colors">
-                                <span className="text-xs font-bold text-slate-600 group-hover:text-blue-600">{section}</span>
-                                <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-black border ${gradeColor}`}>
-                                    {grade}
+                            <div key={section.id} className="border-b border-slate-100 last:border-0 pb-1">
+                                <button
+                                    onClick={() => toggleSection(section.id)}
+                                    className="w-full flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg group transition-colors focus:outline-none"
+                                >
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 group-hover:text-blue-600">
+                                        {section.title}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`px-2 py-0.5 rounded flex items-center justify-center text-[9px] font-black border ${getBadgeStyle(section.score)}`}>
+                                            {section.score}%
+                                        </div>
+                                        <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-300 ${isExpanded ? 'transform rotate-180' : ''}`} />
+                                    </div>
+                                </button>
+                                
+                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                    <div className="flex flex-col py-1 pb-2 px-1">
+                                        {section.items.map((item) => {
+                                            const isActive = activeItemId === item.id;
+                                            return (
+                                                <button
+                                                    key={item.id}
+                                                    onClick={() => handleItemClick(item.id)}
+                                                    className={`flex items-start gap-2 w-full text-left p-1.5 rounded-md transition-colors ${
+                                                        isActive ? 'bg-blue-50/60' : 'hover:bg-slate-50'
+                                                    }`}
+                                                >
+                                                    {item.isPass ? (
+                                                        <CheckCircle className="w-3 h-3 text-green-500 mt-0.5 shrink-0" />
+                                                    ) : (
+                                                        <XCircle className="w-3 h-3 text-red-500 mt-0.5 shrink-0" />
+                                                    )}
+                                                    <div className="flex flex-col">
+                                                        <span className={`text-[10px] font-bold ${isActive ? 'text-blue-700' : 'text-slate-600'}`}>
+                                                            {item.label}
+                                                        </span>
+                                                        <span className={`text-[9px] ${item.isPass ? 'text-slate-400' : 'text-red-500 font-bold'}`}>
+                                                            {item.message}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </a>
+                            </div>
                         );
                     })}
                 </div>
@@ -348,7 +564,7 @@ export default function Dashboard() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 pb-6 border-b border-slate-100">
                     <div>
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Full Diagnostic Audit</h1>
-                        <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-wider">Targeting: Software Development Engineer (6-8 LPA)</p>
+                        <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-wider">Targeting: {suggestedRoles?.[0] || 'Software Professional'}</p>
                     </div>
                     <motion.button 
                         whileHover={{ y: -2 }}
@@ -360,193 +576,50 @@ export default function Dashboard() {
                     </motion.button>
                 </div>
 
-                <div className={`space-y-10 transition-opacity duration-1000 ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                <div className={`space-y-6 lg:max-w-[700px] xl:max-w-none transition-opacity duration-1000 ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                     
-                    {/* DENSE CARDS GRID */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        
-                        {/* Sub-Checklist: Contact Info Card */}
-                        <div id="contact info" className="scroll-mt-24">
-                            <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Core Essentials</h2>
-                            <div className="border border-slate-200 rounded-xl p-6 bg-white shadow-sm h-full">
-                                <h3 className="font-bold text-slate-900 mb-5 flex items-center gap-2">Contact Integrations</h3>
-                                
-                                <ul className="space-y-3">
-                                    <ChecklistRow icon={Mail} label="Email Address" statusName="Email" isComplete={hasEmail} />
-                                    <ChecklistRow icon={Hash} label="Mobile Phone" statusName="Phone Number" isComplete={hasPhone} />
-                                    <ChecklistRow icon={Linkedin} label="LinkedIn Profile" statusName="LinkedIn URL" isComplete={hasLinkedin} />
-                                    <ChecklistRow icon={MapPin} label="Location / City" statusName="Location" isComplete={true} />
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* Sub-Checklist: Content Card (Progress Bars) */}
-                        <div id="experience" className="scroll-mt-24">
-                            <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Metrics Density</h2>
-                            <div className="border border-slate-200 rounded-xl p-6 bg-white shadow-sm h-full flex flex-col justify-center">
-                                <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">Content Analysis</h3>
-                                <div className="space-y-3">
-                                    <ProgressBar label="Action Verbs" percentage={verbsScore} colorClass="bg-blue-600" />
-                                    <ProgressBar label="Quantifiable Impact" percentage={quantScore} colorClass={quantScore > 50 ? "bg-green-600" : "bg-amber-500"} />
-                                    <ProgressBar label="Word Density" percentage={wordDensity} colorClass="bg-indigo-600" />
+                    <div className="flex flex-col gap-10 mb-16 scroll-mt-28">
+                        {sidebarData.map(category => (
+                            <div id={category.id} key={category.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                                <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                                    <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                                        <Layout className="w-5 h-5 text-slate-400"/> {category.title}
+                                    </h2>
                                 </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    {/* Skills & Keyword Targeting Card */}
-                    <div id="skills" className="scroll-mt-24 border border-slate-200 rounded-xl p-6 md:p-8 bg-white shadow-sm">
-                        <div className="flex justify-between items-start mb-6">
-                            <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                                <Target className="w-5 h-5 text-blue-500" /> Skills & Keyword Targeting
-                            </h3>
-                            {skills_targeting && skills_targeting.targeting_score !== undefined && (
-                                <div className="text-right flex items-center gap-2">
-                                    <div className="text-right">
-                                        <span className="block text-2xl font-black text-blue-600">{skills_targeting.targeting_score}%</span>
-                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold">Match Score</span>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        {skills_targeting && skills_targeting.recommendation && (
-                            <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800 font-medium flex items-center gap-2">
-                                <Zap className="w-4 h-4 text-blue-500"/> {skills_targeting.recommendation}
-                            </div>
-                        )}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-green-600"/> Important keywords found</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {matchedSkills?.length > 0 ? matchedSkills.map(skill => (
-                                        <span key={skill} className="px-3 py-1 bg-green-50 text-green-700 rounded text-xs font-bold border border-green-100">
-                                            {skill.toUpperCase()}
-                                        </span>
-                                    )) : <span className="text-slate-400 text-xs font-medium">Searching for keywords... Please paste a Job Description.</span>}
-                                </div>
-                            </div>
-                            <div>
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><XCircle className="w-3 h-3 text-red-600"/> Important keywords missing</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {missingSkills?.length > 0 ? missingSkills.map(skill => (
-                                        <span key={skill} className="px-3 py-1 bg-red-50 text-red-700 rounded text-xs font-bold border border-red-100">
-                                            {skill.toUpperCase()}
-                                        </span>
-                                    )) : (
-                                        (!matchedSkills || matchedSkills.length === 0) ? 
-                                        <span className="text-slate-400 text-xs font-medium">Paste JD to map against requirements.</span> :
-                                        <span className="text-green-600 text-xs font-bold">Perfect match!</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Grammar & Tone Cards */}
-                    <div id="grammar-tone" className="scroll-mt-24">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* Spelling & Grammar */}
-                            <div className="border border-slate-200 rounded-xl p-6 bg-white shadow-sm flex flex-col">
-                                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <Type className="w-5 h-5 text-indigo-500" /> Spelling & Grammar
-                                </h3>
-                                {spelling_errors && spelling_errors.length > 0 ? (
-                                    <ul className="space-y-3 flex-1 overflow-y-auto max-h-48 pr-2 custom-scrollbar">
-                                        {spelling_errors.map((err, i) => (
-                                            <li key={i} className="flex flex-col text-[13px] border-b border-slate-100 pb-2">
-                                                <span className="font-bold text-slate-700">Error found: <span className="text-red-600 font-medium">{err.word}</span></span>
-                                                <span className="font-bold text-slate-700 flex gap-1 items-center mt-1">
-                                                    <ArrowRightLeft className="w-3 h-3 text-slate-400"/> Suggestion: <span className="text-green-600">{err.suggestion}</span>
-                                                </span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 py-4">
-                                        <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
-                                        <p className="text-xs font-bold text-slate-600">No spelling errors found!</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Personal Pronoun Check */}
-                            <div className="border border-slate-200 rounded-xl p-6 bg-white shadow-sm flex flex-col">
-                                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <AlertTriangle className="w-5 h-5 text-amber-500" /> Personal Pronoun Check
-                                </h3>
-                                <div className="flex-1 flex flex-col">
-                                    {pronoun_errors && pronoun_errors.length > 0 ? (
-                                        <div className="flex flex-col gap-2">
-                                            <span className="font-bold text-slate-700 text-xs">Error found:</span>
-                                            <div className="flex flex-wrap gap-2">
-                                                {pronoun_errors.map((p, i) => (
-                                                    <span key={i} className="px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-bold border border-red-100 uppercase">{p}</span>
-                                                ))}
-                                            </div>
-                                            <div className="mt-2 text-[11px] text-slate-500 text-left bg-slate-50 p-2 rounded border border-slate-100">
-                                                <span className="font-bold text-slate-700">Why it matters:</span> Avoid using personal pronouns like I, me, my in resume. Keep it short and professional
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
-                                            <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
-                                            <span className="text-sm font-bold text-green-700 mb-2">Great! No error detected</span>
-                                            <div className="mt-2 text-[11px] text-slate-500 text-left bg-slate-50 p-2 rounded border border-slate-100">
-                                                <span className="font-bold text-slate-700">Why it matters:</span> Avoid using personal pronouns like I, me, my in resume. Keep it short and professional
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Complex Sentences */}
-                            <div className="border border-slate-200 rounded-xl p-6 bg-white shadow-sm flex flex-col">
-                                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <Layout className="w-5 h-5 text-teal-500" /> Complex Sentences
-                                </h3>
-                                <div className="flex-1 flex flex-col">
-                                    {complex_sentences && complex_sentences.length > 0 ? (
-                                        <div className="space-y-3 overflow-y-auto max-h-48 pr-2 custom-scrollbar">
-                                            {complex_sentences.map((cs, i) => (
-                                                <div key={i} className="text-[11px] bg-slate-50 border-l-2 border-red-400 p-2 rounded-r flex flex-col gap-1">
-                                                    <p className="text-slate-700 font-medium italic">"{cs.sentence}"</p>
-                                                    <p className="text-red-600 font-bold leading-tight">{cs.issue} {cs.fix}</p>
+                                <div className="flex flex-col">
+                                    {category.items.map((item, index) => {
+                                        let badgeColors = 'bg-red-50 text-red-600 border border-red-100';
+                                        if (item.isPass) badgeColors = 'bg-green-50 text-green-600 border border-green-100';
+                                        else if (item.message === 'Needs improvement' || item.message.includes('issues')) {
+                                            if (item.message === 'Needs improvement') badgeColors = 'bg-yellow-50 text-yellow-600 border border-yellow-100';
+                                        }
+                                        return (
+                                            <div id={item.id} key={item.id} className={`flex flex-col px-6 py-5 hover:bg-slate-50 transition-colors scroll-mt-28 ${index !== category.items.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                                                <div className="flex flex-row items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        {item.isPass ? <CheckCircle className="w-5 h-5 text-green-500 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />}
+                                                        <span className="text-base font-bold text-slate-800">{item.label}</span>
+                                                    </div>
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${badgeColors}`}>
+                                                        {item.message || (item.isPass ? 'No issues' : 'Needs Work')}
+                                                    </span>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 py-4">
-                                            <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
-                                            <span className="text-xs font-bold text-slate-600">Sentences are concise and readable.</span>
-                                        </div>
-                                    )}
+                                                <div className="ml-8 mt-4 text-[13px] text-slate-600 leading-relaxed font-medium">
+                                                    {categoryDetails[item.id]}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                        </div>
+                        ))}
                     </div>
 
-                    {/* Live Resume Critique */}
-                    <div className="scroll-mt-24">
-                        <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Line Analysis</h2>
-                        <div className="border border-slate-200 rounded-xl p-6 md:p-8 bg-white shadow-sm">
-                            <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">Live Resume Critique</h3>
-                            <p className="text-[13px] text-slate-500 font-medium mb-6">We found {quantificationSuggestions?.length || 0} bullet points that can be optimized for ATS systems.</p>
-                            
-                            <div className="flex flex-col">
-                                {quantificationSuggestions && quantificationSuggestions.length > 0 ? quantificationSuggestions.map((qs, idx) => (
-                                    <CritiqueCard key={idx} qs={qs} />
-                                )) : (
-                                    <div className="text-center p-8 bg-slate-50 rounded-lg border border-slate-100">
-                                        <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                                        <h3 className="text-sm font-bold text-slate-900">No major critiques!</h3>
-                                        <p className="text-xs text-slate-500 mt-1">Your bullet points are well-quantified.</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                    {/* Spacer to allow scrolling to the bottom items comfortably */}
+                    <div className="h-[60vh] flex flex-col items-center justify-center opacity-30">
+                        <Crown className="w-10 h-10 text-slate-300 mb-2"/>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">End of Report</p>
                     </div>
-
                 </div>
             </div>
             

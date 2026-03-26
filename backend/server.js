@@ -10,6 +10,8 @@ const User = require('./models/User');
 const { mockUsers } = require('./routes/auth');
 
 
+const mammoth = require('mammoth');
+
 dotenv.config();
 
 const app = express();
@@ -45,9 +47,19 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
         let company = req.body.company || "General";
         let userId = req.body.userId || null;
 
-        // Parse PDF
-        const data = await pdfParse(req.file.buffer);
-        const text = data.text;
+        let text = "";
+        
+        // Parse File based on Mimetype
+        if (req.file.mimetype === 'application/pdf') {
+            const data = await pdfParse(req.file.buffer);
+            text = data.text;
+        } else if (req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            const data = await mammoth.extractRawText({ buffer: req.file.buffer });
+            text = data.value;
+        } else {
+            // Fallback to plain text if possible
+            text = req.file.buffer.toString('utf-8');
+        }
 
         // Sent text to Python AI Service
         let aiResult;
