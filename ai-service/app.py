@@ -99,11 +99,18 @@ def analyze_resume():
         words_to_check = re.findall(r'\b[a-zA-Z]+\b', resume_text)
         words_to_check = [w.lower() for w in words_to_check if w.lower() not in KNOWN_SKILLS and len(w) > 2]
         misspelled = spell.unknown(words_to_check)
-        for idx, word in enumerate(misspelled):
-            if idx >= 5: break
+        
+        errors_found = 0
+        for word in misspelled:
+            if errors_found >= 5: 
+                break
             correction = spell.correction(word)
             if correction and correction != word:
                 spelling_errors.append({"word": word, "suggestion": correction})
+                errors_found += 1
+            elif not correction:
+                spelling_errors.append({"word": word, "suggestion": "No suggestion found"})
+                errors_found += 1
 
     # 4. Quantification & Metrics
     annotated_sentences = []

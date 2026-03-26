@@ -96,11 +96,13 @@ function App() {
     <AuthProvider>
       <Router>
         <LoginCelebration />
-        <div className="min-h-screen bg-slate-50 text-gray-900 font-sans flex flex-col">
-          <Navbar />
-          <main className="flex-1 relative overflow-hidden">
-            <AppRoutes />
-          </main>
+        <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans flex flex-col relative overflow-x-hidden selection:bg-blue-500/30">
+          <div className="relative z-10 flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-1 relative overflow-hidden">
+              <AppRoutes />
+            </main>
+          </div>
         </div>
       </Router>
     </AuthProvider>

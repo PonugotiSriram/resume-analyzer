@@ -13,6 +13,7 @@ export default function UploadPage() {
     const [linkedinUrl, setLinkedinUrl] = useState('');
     const [company, setCompany] = useState('General');
     const [isUploading, setIsUploading] = useState(false);
+    const [loadingStep, setLoadingStep] = useState(0);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -23,6 +24,26 @@ export default function UploadPage() {
             setError(null);
         }
     }, []);
+
+    const loadingMessages = [
+        "Initializing Nexus Engine...",
+        "Extracting raw text from document...",
+        "Running NLP syntax & grammar check...",
+        "Mapping technical skills against Job Description...",
+        "Quantifying impact & metrics...",
+        "Compiling final diagnostic report..."
+    ];
+
+    React.useEffect(() => {
+        let timer;
+        if (isUploading) {
+            setLoadingStep(0);
+            timer = setInterval(() => {
+                setLoadingStep(prev => (prev < loadingMessages.length - 1 ? prev + 1 : prev));
+            }, 800);
+        }
+        return () => clearInterval(timer);
+    }, [isUploading]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -50,9 +71,13 @@ export default function UploadPage() {
         }
 
         try {
-            const response = await axios.post('http://localhost:4000/api/analyze', formData, {
+            // Force a minimum UX delay of 3 seconds so the user can experience the scanning animation
+            const minTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
+            const axiosPromise = axios.post('http://localhost:4000/api/analyze', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+
+            const [response] = await Promise.all([axiosPromise, minTimePromise]);
 
             console.log("Analysis response:", response.data);
             navigate('/dashboard', { state: response.data });
@@ -65,37 +90,88 @@ export default function UploadPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6 md:p-10 space-y-8 animate-in fade-in py-12">
-            <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500">
+        <div className="max-w-4xl mx-auto p-6 md:p-10 space-y-8 animate-in fade-in py-12 relative">
+            {/* Full Screen Loading Overlay */}
+            {isUploading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/95 backdrop-blur-md">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }} 
+                        animate={{ opacity: 1, scale: 1 }} 
+                        className="flex flex-col items-center max-w-md w-full p-8 text-center"
+                    >
+                        <div className="relative mb-8">
+                            {/* Scanning rings */}
+                            <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }} className="absolute inset-0 rounded-full border-t-2 border-indigo-500 w-24 h-24 -ml-2 -mt-2 opacity-50"></motion.div>
+                            <motion.div animate={{ rotate: -360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} className="absolute inset-0 rounded-full border-b-2 border-cyan-400 w-28 h-28 -ml-4 -mt-4 opacity-30"></motion.div>
+                            
+                            <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-full flex items-center justify-center shadow-xl shadow-cyan-500/30 relative z-10">
+                                <Bot className="w-10 h-10 text-white animate-pulse" />
+                            </div>
+                        </div>
+                        
+                        <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Analyzing Resume</h2>
+                        
+                        <div className="h-6 overflow-hidden w-full relative">
+                            {loadingMessages.map((msg, idx) => (
+                                <motion.p 
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: loadingStep === idx ? 1 : 0, y: loadingStep === idx ? 0 : -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="absolute inset-0 text-cyan-400 font-medium text-sm w-full text-center"
+                                    style={{ pointerEvents: 'none' }}
+                                >
+                                    {msg}
+                                </motion.p>
+                            ))}
+                        </div>
+                        
+                        <div className="w-64 h-1.5 bg-gray-800 rounded-full mt-6 overflow-hidden">
+                            <motion.div 
+                                className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full"
+                                initial={{ width: "0%" }}
+                                animate={{ width: `${((loadingStep + 1) / loadingMessages.length) * 100}%` }}
+                                transition={{ duration: 0.5 }}
+                            />
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            <div className={`text-center space-y-2 transition-opacity duration-300 ${isUploading ? 'opacity-0' : 'opacity-100'}`}>
+                <h2 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 tracking-tight">
                     Analyze Your Resume
                 </h2>
-                <p className="text-gray-400">Upload your PDF and paste a job description. Let our AI career coach score you.</p>
+                <p className="text-slate-500 font-medium text-lg">Upload your PDF and paste a job description. Let our AI career coach score you.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 {/* Upload Column */}
-                <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4 text-sm font-medium">
-                    <label className="text-gray-300">1. Required: Resume PDF</label>
-                    <div {...getRootProps()} className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all min-h-[250px]
-              ${isDragActive ? 'border-cyan-400 bg-cyan-950/20' : 'border-gray-600 glass-card hover:border-indigo-400/60'}`}>
+                <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4 text-sm font-bold">
+                    <label className="text-slate-700 uppercase tracking-wider text-[11px] flex items-center gap-2 mb-2"><UploadCloud className="w-4 h-4 text-blue-600"/> 1. Upload Resume PDF</label>
+                    <div {...getRootProps()} className={`border-2 border-dashed bg-white rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all min-h-[250px] shadow-sm
+              ${isDragActive ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200 hover:border-blue-500 hover:shadow-md'}`}>
                         <input {...getInputProps()} />
                         {file ? (
-                            <div className="flex flex-col items-center text-emerald-400 gap-2">
-                                <FileText className="w-12 h-12 mb-2" />
-                                <p className="font-semibold text-center">{file.name}</p>
-                                <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                                <button className="text-indigo-400 text-xs hover:underline mt-2 flex items-center gap-1" onClick={(e) => { e.stopPropagation(); setFile(null); }}>
-                                    Remove
+                            <div className="flex flex-col items-center gap-3">
+                                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-2">
+                                    <FileText className="w-8 h-8" />
+                                </div>
+                                <p className="font-bold text-center text-slate-800 text-base">{file.name}</p>
+                                <p className="text-xs text-slate-500 font-medium">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                <button className="text-slate-500 hover:text-red-500 font-bold uppercase tracking-wider text-[10px] mt-2 transition-colors flex items-center gap-1" onClick={(e) => { e.stopPropagation(); setFile(null); }}>
+                                    <XCircle className="w-3 h-3" /> Remove File
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center text-gray-400 gap-3">
-                                <UploadCloud className="w-12 h-12 text-indigo-400/80 mb-2" />
-                                <p className="text-base text-center">Drag & drop your PDF here</p>
-                                <p className="text-xs text-gray-500">Only PDF files are supported</p>
-                                <div className="px-5 py-2 mt-4 bg-gray-800 rounded-lg shadow font-medium hover:bg-gray-700 transition">
+                            <div className="flex flex-col items-center text-slate-400 gap-3">
+                                <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mb-2 shadow-sm">
+                                    <UploadCloud className="w-8 h-8 text-blue-600" />
+                                </div>
+                                <p className="text-base text-center font-bold text-slate-800">Drag & Drop your PDF here</p>
+                                <p className="text-xs text-slate-500 font-medium">Strictly .pdf files up to 5MB</p>
+                                <div className="px-6 py-2 mt-4 bg-white border border-slate-200 text-slate-700 rounded-lg shadow-sm font-bold hover:bg-slate-50 hover:text-blue-600 transition-colors text-xs uppercase tracking-wider">
                                     Browse Files
                                 </div>
                             </div>
@@ -107,51 +183,50 @@ export default function UploadPage() {
                 <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-gray-300 text-sm font-medium">Your Name (Optional)</label>
+                            <label className="text-slate-700 uppercase tracking-wider text-[11px] font-bold">Your Name</label>
                             <input
                                 value={candidateName}
                                 onChange={(e) => setCandidateName(e.target.value)}
-                                placeholder="e.g., Sai Ram"
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                                placeholder="E.g., John Doe"
+                                className="w-full bg-white border border-slate-200 rounded-lg p-3.5 text-slate-800 font-medium placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-gray-300 text-sm font-medium">LinkedIn URL (Optional)</label>
+                            <label className="text-slate-700 uppercase tracking-wider text-[11px] font-bold">LinkedIn URL</label>
                             <input
                                 value={linkedinUrl}
                                 onChange={(e) => setLinkedinUrl(e.target.value)}
-                                placeholder="linkedin.com/in/username"
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                                placeholder="linkedin.com/in/john"
+                                className="w-full bg-white border border-slate-200 rounded-lg p-3.5 text-slate-800 font-medium placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
                         </div>
                     </div>
                     
                     <div className="space-y-2">
-                        <label className="text-gray-300 text-sm font-medium">Target Company ATS</label>
+                        <label className="text-slate-700 uppercase tracking-wider text-[11px] font-bold">Target ATS System</label>
                         <select
                             value={company}
                             onChange={(e) => setCompany(e.target.value)}
-                            className="w-full bg-gray-900/50 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                            className="w-full bg-white border border-slate-200 rounded-lg p-3.5 text-slate-800 font-medium shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                         >
-                            <option value="General">General (Default ATS)</option>
-                            <option value="Wipro">Wipro</option>
-                            <option value="Infosys">Infosys</option>
-                            <option value="TCS">TCS</option>
-                            <option value="Cognizant">Cognizant</option>
-                            <option value="Accenture">Accenture</option>
+                            <option value="General">General / Standard Workday</option>
+                            <option value="Wipro">Wipro Internal</option>
+                            <option value="Infosys">Infosys ATS</option>
+                            <option value="TCS">TCS iON</option>
+                            <option value="Cognizant">Cognizant Taleo</option>
+                            <option value="Accenture">Accenture Workday</option>
                         </select>
                     </div>
 
                     <div className="space-y-2 flex-grow">
-                        <label className="text-gray-300 text-sm font-medium">2. Required: Job Description</label>
+                        <label className="text-slate-700 uppercase tracking-wider text-[11px] font-bold flex items-center gap-2 mb-2"><Bot className="w-4 h-4 text-blue-600"/> 2. Target Job Description</label>
                         <div className="relative h-full text-base">
                             <textarea
                                 value={jobDescription}
                                 onChange={(e) => setJobDescription(e.target.value)}
-                                placeholder="Paste the target job description here. Our NLP will extract required skills automatically..."
-                                className="w-full h-full min-h-[160px] resize-y bg-gray-900/50 border border-gray-700 rounded-xl p-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 block"
+                                placeholder="Paste the exact job description here. Our AI will align your metrics..."
+                                className="w-full h-full min-h-[160px] resize-y bg-white border border-slate-200 rounded-lg p-4 text-slate-800 font-medium leading-relaxed shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block transition-colors"
                             />
-                            <Bot className="absolute bottom-4 right-4 w-5 h-5 text-gray-600" />
                         </div>
                     </div>
                 </motion.div>

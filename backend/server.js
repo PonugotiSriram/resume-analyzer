@@ -132,6 +132,11 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
             linkedinFeedback: aiResult.linkedin_feedback || "",
             suggestedRoles: aiResult.suggested_roles,
             topIndustrySkills: aiResult.top_industry_skills,
+            spellingErrors: aiResult.spelling_errors || [],
+            repetitionErrors: aiResult.repetition_errors || [],
+            verbsScore: aiResult.verbs_score || 0,
+            quantScore: aiResult.quant_score || 0,
+            sectionGrades: aiResult.section_grades || {},
             createdAt: new Date().toISOString()
         };
 
@@ -152,6 +157,60 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
         res.json(candidate);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// NEW ROUTE: Live text analysis for the in-browser editor
+app.post('/api/analyze-text', async (req, res) => {
+    try {
+        const { text, jobDescription = "", candidateName = "Unknown Candidate", linkedinUrl = "", company = "General", userId = null } = req.body;
+        
+        if (!text) {
+            return res.status(400).json({ error: 'No text provided.' });
+        }
+
+        // Send text directly to Python AI Service
+        let aiResult;
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/analyze', {
+                resume_text: text,
+                job_description: jobDescription,
+                linkedin_url: linkedinUrl,
+                company: company
+            });
+            aiResult = response.data;
+        } catch (err) {
+            console.error('AI Service Err (Text Mode):', err.message);
+            return res.status(500).json({ error: 'AI engine unavailable.' });
+        }
+
+        const candidate = {
+            id: Date.now().toString(),
+            name: candidateName + " (Live Edit)",
+            linkedinUrl, company, status: aiResult.status, matchScore: aiResult.match_score,
+            atsScore: aiResult.ats_compatibility || aiResult.ats_score, nexusScore: aiResult.nexus_score,
+            atsCompatibility: aiResult.ats_compatibility, contentQuality: aiResult.content_quality,
+            formattingScore: aiResult.formatting_score, linkedinPresence: aiResult.linkedin_presence,
+            wordCount: aiResult.word_count, readingTime: aiResult.reading_time,
+            diagnosticReport: aiResult.diagnostic_report || [], coachSteps: aiResult.coach_steps || [],
+            rawResumeText: aiResult.raw_resume_text, optimizedSummary: aiResult.optimized_summary,
+            chatbotMessage: aiResult.chatbot_message, annotatedSentences: aiResult.annotated_sentences,
+            skills: aiResult.resume_skills, matchedSkills: aiResult.matched_skills, missingSkills: aiResult.missing_skills,
+            healthScore: aiResult.health_score, healthBreakdown: aiResult.health_breakdown,
+            suggestions: aiResult.suggestions, roadmap: aiResult.roadmap, aiCoachSuggestions: aiResult.ai_coach_suggestions,
+            projectSuggestions: aiResult.project_suggestions || [], quantificationSuggestions: aiResult.quantification_suggestions || [],
+            linkedinFeedback: aiResult.linkedin_feedback || "", suggestedRoles: aiResult.suggested_roles,
+            topIndustrySkills: aiResult.top_industry_skills, 
+            spellingErrors: aiResult.spelling_errors || [], repetitionErrors: aiResult.repetition_errors || [],
+            verbsScore: aiResult.verbs_score || 0, quantScore: aiResult.quant_score || 0,
+            sectionGrades: aiResult.section_grades || {},
+            createdAt: new Date().toISOString()
+        };
+
+        resumes.push(candidate);
+        res.json(candidate);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to analyze edited text' });
     }
 });
 

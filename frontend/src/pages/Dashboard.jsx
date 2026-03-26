@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, Navigate } from 'react-router-dom';
-import { FileDown, Activity, Linkedin, Clock, Hash, Zap, Target, Mail, ArrowRightLeft, Crown, Loader2, Circle, Layout, MapPin, CheckCircle, XCircle, Type, AlertTriangle, ChevronDown } from 'lucide-react';
+import { useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { FileDown, FileText, Bot, Activity, Linkedin, Clock, Hash, Zap, Target, Mail, ArrowRightLeft, Crown, Loader2, Circle, Layout, MapPin, CheckCircle, XCircle, Type, PenTool, AlertTriangle, ChevronDown, Upload as UploadIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -203,10 +203,14 @@ const DetailCard = ({ id, title, icon: Icon, isPass, issueText, explanation, sug
 
 export default function Dashboard() {
     const { state } = useLocation();
+    const navigate = useNavigate();
     const result = state?.result || state;
     const [scanPhase, setScanPhase] = useState(0);
     const [expandedSections, setExpandedSections] = useState({ content: true, sections: true, 'ats-essentials': true, tailoring: true });
     const [activeItemId, setActiveItemId] = useState(null);
+    const [isEditingMode, setIsEditingMode] = useState(false);
+    const [editedText, setEditedText] = useState("");
+    const [isRescanning, setIsRescanning] = useState(false);
 
     const toggleSection = (sectionId) => {
         setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
@@ -236,11 +240,30 @@ export default function Dashboard() {
         matchedSkills = [], missingSkills = [], optimizedSummary = '', 
         wordCount = 0, readingTime = 0, diagnosticReport = [], coachSteps = [],
         quantificationSuggestions = [],
-        spelling_errors = [], pronoun_errors = [], complex_sentences = [], skills_targeting = {},
-        repetition_errors = [], verbs_score = 0, quant_score = 0, section_grades = {},
+        spellingErrors: spelling_errors = [], pronoun_errors = [], complex_sentences = [], skills_targeting = {},
+        repetitionErrors: repetition_errors = [], verbsScore: verbs_score = 0, quantScore: quant_score = 0, sectionGrades: section_grades = {},
         nexus_score = 0, ats_compatibility = 0, content_quality = 0, formatting_score = 0, linkedin_presence = 0,
-        match_score = 0
+        match_score = 0, rawResumeText = ''
     } = result || {};
+    
+    const handleRescan = async () => {
+        setIsRescanning(true);
+        try {
+            const apiRes = await axios.post('http://localhost:4000/api/analyze-text', {
+                text: editedText,
+                candidateName: result.name || "Applicant",
+                jobDescription: result.jobDescription || ""
+            });
+            // Update dashboard with new data
+            navigate('.', { state: apiRes.data, replace: true });
+            setScanPhase(0);
+            setIsEditingMode(false);
+        } catch (error) {
+            alert("Analysis failed. Please check backend connection.");
+        } finally {
+            setIsRescanning(false);
+        }
+    };
 
     // Step 2: Data Extraction
     const hasEmail = diagnosticReport?.some(r => r.aspect === 'Email Included' && r.status === 'pass');
@@ -433,10 +456,10 @@ export default function Dashboard() {
 
     // Step 3: Update UI
     return (
-        <div className="min-h-screen bg-white text-slate-800 font-sans antialiased overflow-y-auto custom-scrollbar flex">
+        <div className="min-h-screen bg-transparent text-slate-800 font-sans antialiased overflow-y-auto custom-scrollbar flex">
             
-            {/* LEFT SIDEBAR */}
-            <div className="w-72 shrink-0 border-r border-slate-100 bg-white min-h-screen h-full fixed top-[72px] left-0 overflow-y-auto p-6 flex flex-col hidden lg:flex">
+            {/* LEFT SIDEBAR - Crisp White */}
+            <div className="w-72 shrink-0 border-r border-slate-200 bg-white min-h-screen h-full fixed top-[72px] left-0 overflow-y-auto p-6 flex-col hidden lg:flex shadow-sm z-10">
                 
                 {/* Score Gauge */}
                 <div className="flex flex-col items-center border-b border-slate-100 pb-8 mb-6">
@@ -455,14 +478,14 @@ export default function Dashboard() {
                 </div>
 
                 {/* 1. Score Breakdown Gauges */}
-                <div className="bg-[#f8fafc] rounded-lg p-6 mb-8 border border-slate-100">
+                <div className="bg-slate-50/50 rounded-xl p-6 mb-8 border border-slate-100 shadow-sm">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-1.5">
                         <Activity className="w-3 h-3 text-blue-500"/> Performance Metrics
                     </h3>
-                    <ProgressBar label="ATS Connectivity" percentage={ats_compatibility || 0} colorClass="bg-blue-600" />
-                    <ProgressBar label="Content Quality" percentage={content_quality || 0} colorClass="bg-green-600" />
-                    <ProgressBar label="Formatting" percentage={formatting_score || 0} colorClass="bg-amber-600" />
-                    <ProgressBar label="Online Presence" percentage={linkedin_presence || 0} colorClass="bg-purple-600" />
+                    <ProgressBar label="ATS Connectivity" percentage={ats_compatibility || 0} colorClass="bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/20" />
+                    <ProgressBar label="Content Quality" percentage={content_quality || 0} colorClass="bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-md shadow-green-500/20" />
+                    <ProgressBar label="Formatting" percentage={formatting_score || 0} colorClass="bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md shadow-amber-500/20" />
+                    <ProgressBar label="Online Presence" percentage={linkedin_presence || 0} colorClass="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md shadow-purple-500/20" />
                 </div>
 
                 {/* Section Sidebar - Accordion Menu */}
@@ -522,7 +545,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Audit Progress Box */}
-                <div className="mt-auto bg-[#f8fafc] rounded-lg p-4 border border-slate-100">
+                <div className="mt-auto bg-slate-50/50 rounded-xl p-4 border border-slate-100 shadow-sm">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                         {scanPhase < 4 ? <Loader2 className="w-3 h-3 animate-spin"/> : <Activity className="w-3 h-3 text-green-500"/>}
                         Audit Progress
@@ -566,24 +589,125 @@ export default function Dashboard() {
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Full Diagnostic Audit</h1>
                         <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-wider">Targeting: {suggestedRoles?.[0] || 'Software Professional'}</p>
                     </div>
-                    <motion.button 
-                        whileHover={{ y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleDownload} 
-                        className={`mt-4 sm:mt-0 flex items-center gap-2 bg-white hover:bg-slate-50 text-blue-700 py-2 px-4 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm border border-slate-200 transition-opacity duration-1000 ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                    >
-                        <FileDown className="w-4 h-4" /> Download Report <Crown className="w-3 h-3 text-amber-500"/>
-                    </motion.button>
+                    <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-center gap-3">
+                        <motion.button 
+                            whileHover={{ y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => { setEditedText(rawResumeText); setIsEditingMode(true); }} 
+                            className={`flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm shadow-blue-500/30 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                        >
+                            <PenTool className="w-4 h-4" /> Live Edit
+                        </motion.button>
+                        <motion.button 
+                            whileHover={{ y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleDownload} 
+                            className={`flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm border border-slate-200 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                        >
+                            <FileDown className="w-4 h-4" /> Download PDF <Crown className="w-3 h-3 text-amber-500"/>
+                        </motion.button>
+                    </div>
                 </div>
 
-                <div className={`space-y-6 lg:max-w-[700px] xl:max-w-none transition-opacity duration-1000 ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                {/* The Ultimate Modern AI Core Animation while scanPhase < 4 */}
+                {scanPhase < 4 && (
+                    <div className="space-y-6 lg:max-w-[800px] xl:max-w-none">
+                        <div className="relative w-full min-h-[480px] flex flex-col items-center justify-center overflow-hidden bg-slate-900 rounded-[2rem] shadow-2xl shadow-indigo-500/20 border border-slate-800">
+                            
+                            {/* Moving Grid Background */}
+                            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_80%,transparent_100%)] opacity-30 pointer-events-none"></div>
+
+                            {/* Massive Dynamic Blurs */}
+                            <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }} className="absolute w-[600px] h-[600px] bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none"></motion.div>
+                            <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: 'linear' }} className="absolute w-[400px] h-[400px] bg-cyan-400/10 blur-[80px] rounded-full pointer-events-none"></motion.div>
+
+                            {/* Complex SVG/Motion Core */}
+                            <div className="relative z-10 flex items-center justify-center mt-10 mb-20 scale-125">
+                                
+                                {/* Outer radar ring */}
+                                <motion.div animate={{ rotate: 360 }} transition={{ duration: 12, repeat: Infinity, ease: "linear" }} className="absolute w-56 h-56 rounded-full border border-dashed border-slate-600/50"></motion.div>
+                                
+                                {/* Inner solid ring with intense glowing tail */}
+                                <div className="absolute w-40 h-40 rounded-full border border-slate-700 bg-slate-800/20 backdrop-blur-sm"></div>
+                                <motion.div animate={{ rotate: -360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }} className="absolute w-40 h-40 rounded-full border-t-2 border-r-2 border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.6)] object-cover"></motion.div>
+
+                                {/* Orbiting Satellite Node 1 */}
+                                <motion.div animate={{ rotate: 360 }} transition={{ duration: 5, repeat: Infinity, ease: "linear" }} className="absolute w-40 h-40 rounded-full">
+                                    <div className="absolute top-0 left-1/2 -ml-1.5 -mt-1.5 w-3 h-3 bg-white rounded-full shadow-[0_0_15px_white]"></div>
+                                </motion.div>
+
+                                {/* Orbiting Satellite Node 2 (Counter Direction) */}
+                                <motion.div animate={{ rotate: -360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} className="absolute w-56 h-56 rounded-full">
+                                    <div className="absolute bottom-0 right-1/2 -mr-1 -mb-1 w-2 h-2 bg-indigo-400 rounded-full shadow-[0_0_10px_rgba(99,102,241,1)]"></div>
+                                </motion.div>
+
+                                {/* Center Brain Core */}
+                                <motion.div 
+                                    animate={{ scale: [1, 1.15, 1], boxShadow: ["0 0 30px rgba(99,102,241,0.4)", "0 0 60px rgba(99,102,241,0.8)", "0 0 30px rgba(99,102,241,0.4)"] }} 
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                    className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-cyan-500 rounded-full flex flex-col items-center justify-center backdrop-blur-xl border-2 border-white/20 relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-white/20 mask-image:linear-gradient(to_bottom,white,transparent)"></div>
+                                    <Bot className="w-8 h-8 text-white drop-shadow-lg relative z-10" />
+                                </motion.div>
+                            </div>
+
+                            {/* Typography & Terminal Progress - The Matrix Feel */}
+                            <div className="relative z-10 w-full max-w-sm mb-12">
+                                <div className="flex justify-between items-center mb-3 px-1">
+                                    <span className="text-cyan-400 font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] font-bold flex items-center gap-2">
+                                        <Loader2 className="w-4 h-4 animate-spin text-cyan-400" /> System Uplink Active
+                                    </span>
+                                    <span className="text-slate-400 font-mono text-xs font-bold tracking-wider">{(scanPhase * 25) + 12}%<span className="opacity-50">/100%</span></span>
+                                </div>
+                                
+                                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                                    <motion.div 
+                                        initial={{ width: 0 }} 
+                                        animate={{ width: `${(scanPhase + 1) * 25}%` }} 
+                                        transition={{ duration: 0.6, ease: "easeOut" }}
+                                        className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 shadow-[0_0_10px_rgba(34,211,238,0.8)] rounded-full relative"
+                                    >
+                                        <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-white/50 to-transparent"></div>
+                                    </motion.div>
+                                </div>
+                            </div>
+
+                            {/* The dynamic heavy text */}
+                            <div className="h-16 relative z-10 flex justify-center w-full">
+                                <AnimatePresence mode="wait">
+                                    <motion.div 
+                                        key={scanPhase}
+                                        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="absolute text-center"
+                                    >
+                                        <h3 className="text-xl sm:text-2xl font-black text-white tracking-widest uppercase mb-2 shadow-black drop-shadow-md">
+                                            {scanPhase === 0 && "Parsing Identity Data"}
+                                            {scanPhase === 1 && "Verifying ATS Integrity"}
+                                            {scanPhase === 2 && "Computing Content Impact"}
+                                            {scanPhase === 3 && "Benchmarking Skills"}
+                                        </h3>
+                                        <p className="text-cyan-500/70 text-[10px] sm:text-xs font-mono lowercase tracking-widest">
+                                            [ executing neural logic block_0{scanPhase + 1} ... ]
+                                        </p>
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className={`space-y-6 lg:max-w-[700px] xl:max-w-none transition-opacity duration-1000 ${scanPhase === 4 ? 'opacity-100 block' : 'opacity-0 hidden'}`}>
                     
                     <div className="flex flex-col gap-10 mb-16 scroll-mt-28">
                         {sidebarData.map(category => (
-                            <div id={category.id} key={category.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                                <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                            <div id={category.id} key={category.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col transition-all hover:shadow-md">
+                                <div className="px-6 py-5 border-b border-slate-100 bg-slate-50">
                                     <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                                        <Layout className="w-5 h-5 text-slate-400"/> {category.title}
+                                        <Layout className="w-5 h-5 text-blue-600"/> {category.title}
                                     </h2>
                                 </div>
                                 <div className="flex flex-col">
@@ -591,10 +715,10 @@ export default function Dashboard() {
                                         let badgeColors = 'bg-red-50 text-red-600 border border-red-100';
                                         if (item.isPass) badgeColors = 'bg-green-50 text-green-600 border border-green-100';
                                         else if (item.message === 'Needs improvement' || item.message.includes('issues')) {
-                                            if (item.message === 'Needs improvement') badgeColors = 'bg-yellow-50 text-yellow-600 border border-yellow-100';
+                                            if (item.message === 'Needs improvement') badgeColors = 'bg-amber-50 text-amber-600 border border-amber-100';
                                         }
                                         return (
-                                            <div id={item.id} key={item.id} className={`flex flex-col px-6 py-5 hover:bg-slate-50 transition-colors scroll-mt-28 ${index !== category.items.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                                            <div id={item.id} key={item.id} className={`flex flex-col px-6 py-5 hover:bg-slate-50/50 transition-colors scroll-mt-28 ${index !== category.items.length - 1 ? 'border-b border-slate-100' : ''}`}>
                                                 <div className="flex flex-row items-center justify-between">
                                                     <div className="flex items-center gap-3">
                                                         {item.isPass ? <CheckCircle className="w-5 h-5 text-green-500 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />}
@@ -615,13 +739,76 @@ export default function Dashboard() {
                         ))}
                     </div>
 
-                    {/* Spacer to allow scrolling to the bottom items comfortably */}
-                    <div className="h-[60vh] flex flex-col items-center justify-center opacity-30">
-                        <Crown className="w-10 h-10 text-slate-300 mb-2"/>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">End of Report</p>
+                    {/* Actionable Re-upload Footer */}
+                    <div className="mt-8 mb-20">
+                        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-8 sm:p-10 shadow-lg shadow-blue-900/10 text-center flex flex-col items-center justify-center border border-blue-500/30 relative overflow-hidden">
+                            {/* Decorative background elements */}
+                            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
+                            
+                            <Crown className="w-12 h-12 text-blue-200 mb-4 relative z-10" />
+                            <h2 className="text-2xl font-black text-white tracking-tight mb-2 relative z-10">
+                                Make your edits & try again!
+                            </h2>
+                            <p className="text-blue-100 text-sm font-medium max-w-md mx-auto mb-8 relative z-10 leading-relaxed">
+                                Our analyzer acts identically to a corporate ATS. Improve the identified issues manually and re-analyze your updated resume to ensure an ascending Nexus Score.
+                            </p>
+                            
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => { setEditedText(rawResumeText); setIsEditingMode(true); }}
+                                className="relative z-10 flex items-center gap-3 bg-white text-blue-700 hover:text-blue-800 transition-colors px-8 py-4 rounded-xl font-black shadow-xl shadow-blue-900/20 text-sm uppercase tracking-wider"
+                            >
+                                <PenTool className="w-5 h-5" />
+                                Edit Resume Live
+                            </motion.button>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            {/* Live Editor Modal */}
+            <AnimatePresence>
+                {isEditingMode && (
+                    <motion.div 
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 lg:p-8"
+                    >
+                        <motion.div 
+                            initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
+                            className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-full flex flex-col overflow-hidden border border-slate-200"
+                        >
+                            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <div>
+                                    <h2 className="text-lg font-black text-slate-900 flex items-center gap-2"><Type className="w-5 h-5 text-blue-600"/> In-Browser Live Editor</h2>
+                                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-1">Make direct text changes to bypass the ATS parser instantly</p>
+                                </div>
+                                <button onClick={() => setIsEditingMode(false)} className="text-slate-400 hover:text-red-500 transition-colors p-1"><XCircle className="w-6 h-6"/></button>
+                            </div>
+                            <div className="p-0 flex-1 overflow-hidden flex flex-col bg-white">
+                                <textarea 
+                                    value={editedText || ''}
+                                    onChange={(e) => setEditedText(e.target.value)}
+                                    className="w-full h-[50vh] sm:h-[60vh] p-6 focus:outline-none transition-colors font-mono text-sm leading-relaxed text-slate-700 bg-white resize-none"
+                                    placeholder="Your extracted resume text will appear here. Making changes here simulates an immediate PDF re-upload..."
+                                />
+                            </div>
+                            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+                                <button onClick={() => setIsEditingMode(false)} className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 hover:bg-slate-200 transition-colors border border-slate-200">Cancel</button>
+                                <button 
+                                    onClick={handleRescan}
+                                    disabled={isRescanning}
+                                    className="px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm shadow-blue-500/30 disabled:opacity-50"
+                                >
+                                    {isRescanning ? <Loader2 className="w-4 h-4 animate-spin"/> : <Zap className="w-4 h-4"/>}
+                                    {isRescanning ? 'Analyzing...' : 'Execute Live Rescan'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             
         </div>
     );
