@@ -69,57 +69,13 @@ export default function LandingPage() {
                 </p>
 
                 {/* Upload Box Container */}
-                <div className="bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-blue-100 p-6 md:p-10 max-w-4xl mx-auto text-left relative z-20">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start mb-6">
-                        
-                        {/* Drag and Drop */}
-                        <div>
-                            <label className="block text-sm font-bold text-gray-800 mb-3">1. Upload Resume</label>
-                            <div {...getRootProps()} className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-8 cursor-pointer transition-all h-[240px] shadow-sm
-                                ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-blue-50/30 hover:border-blue-400 hover:bg-blue-50/60'}`}>
-                                <input {...getInputProps()} />
-                                {file ? (
-                                    <div className="flex flex-col items-center text-blue-700 gap-2">
-                                        <FileText className="w-12 h-12 mb-2 text-blue-600" />
-                                        <p className="font-bold text-sm text-center truncate w-full px-4">{file.name}</p>
-                                        <button className="text-xs text-rose-500 hover:text-rose-600 font-semibold px-3 py-1 bg-white rounded-md shadow-sm border border-rose-100 mt-2" onClick={(e) => { e.stopPropagation(); setFile(null); }}>
-                                            Romve File
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center text-gray-500 gap-2">
-                                        <div className="bg-white p-3 rounded-full shadow-sm mb-2"><UploadCloud className="w-8 h-8 text-blue-500" /></div>
-                                        <p className="text-base font-bold text-gray-800">Drag & drop resume</p>
-                                        <p className="text-xs text-gray-500 mb-2">Supported: PDF, DOCX, DOC</p>
-                                        <span className="text-sm font-semibold text-blue-600 border border-blue-200 bg-white px-5 py-2 rounded-lg hover:bg-blue-50 transition-colors shadow-sm">
-                                            Browse Files
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Target Job Role */}
-                        <div className="h-full flex flex-col">
-                            <label className="block text-sm font-bold text-gray-800 mb-3">2. Target Job Description (Optional)</label>
-                            <textarea
-                                value={jobDescription}
-                                onChange={(e) => setJobDescription(e.target.value)}
-                                placeholder="Paste the exact job description you are targeting here. We will cross-reference your resume to extract missing keywords."
-                                className="w-full h-[240px] bg-white border border-gray-200 rounded-2xl p-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm placeholder:text-gray-400 font-medium shadow-sm transition-shadow hover:shadow-md"
-                            />
-                        </div>
-                    </div>
-
-                    {error && <div className="text-rose-600 text-sm font-medium bg-rose-50 border border-rose-100 p-3 rounded-xl mb-4 flex items-center gap-2"><AlertTriangle className="w-4 h-4"/> {error}</div>}
-
-                    <div className="flex justify-center mt-8">
+                <div className="bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-blue-100 p-6 md:p-10 max-w-xl mx-auto text-center relative z-20">
+                    <div className="flex justify-center mt-4">
                         <button 
-                            onClick={handleAnalyze} 
-                            disabled={isUploading}
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-4 px-16 rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed transform hover:-translate-y-1 active:translate-y-0"
+                            onClick={() => navigate('/upload')} 
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-4 px-16 rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center gap-3 transform hover:-translate-y-1 active:translate-y-0"
                         >
-                            {isUploading ? <><Loader2 className="w-6 h-6 animate-spin" /> Analyzing...</> : "Upload & Analyze Resume"}
+                            Upload Resume
                         </button>
                     </div>
                 </div>

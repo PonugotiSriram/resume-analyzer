@@ -38,7 +38,7 @@ const ScoreRing = ({ calculatedScore, scanPhase }) => {
     const isLow = displayScore < 60;
     const isMedium = displayScore >= 60 && displayScore < 80;
     const strokeColor = scanPhase < 4 ? '#374151' : (isLow ? '#f43f5e' : (isMedium ? '#fbbf24' : '#10b981'));
-    const textColor = scanPhase < 4 ? 'text-gray-600' : 'text-gray-100';
+    const textColor = scanPhase < 4 ? 'text-gray-600' : 'text-gray-900';
     
     const radius = 64;
     const circumference = 2 * Math.PI * radius;
@@ -72,7 +72,7 @@ const ScoreRing = ({ calculatedScore, scanPhase }) => {
 // ==========================================
 const ProgressBar = ({ label, percentage, colorClass }) => (
     <div className="flex flex-col gap-1.5 mb-4">
-        <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-gray-400">
+        <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-gray-500">
             <span>{label}</span>
             <span className="text-gray-500">{percentage}%</span>
         </div>
@@ -98,8 +98,8 @@ const CritiqueCard = ({ qs }) => {
     if (showOptimized) borderClass = 'border-l-green-500';
 
     return (
-        <div className={`flex flex-col rounded-r-lg overflow-hidden border-y border-r border-gray-700/50 border-l-4 ${borderClass} bg-gray-800/40 backdrop-blur-md transition-colors duration-300 mb-3 shadow-sm hover:shadow-md`}>
-            <div className="flex justify-between items-center bg-gray-800/30 px-4 py-3 border-b border-gray-800">
+        <div className={`flex flex-col rounded-r-lg overflow-hidden border-y border-r border-gray-200/50 border-l-4 ${borderClass} bg-gray-50/50 backdrop-blur-md transition-colors duration-300 mb-3 shadow-sm hover:shadow-md`}>
+            <div className="flex justify-between items-center bg-gray-50/30 px-4 py-3 border-b border-gray-800">
                 <div className="flex items-center gap-2">
                     {showOptimized ? <CheckCircle className="w-4 h-4 text-green-400"/> : (
                         borderClass === 'border-l-red-500' ? <XCircle className="w-4 h-4 text-red-500"/> : <Zap className="w-4 h-4 text-amber-500"/>
@@ -110,7 +110,7 @@ const CritiqueCard = ({ qs }) => {
                 </div>
                 <button 
                     onClick={() => setShowOptimized(!showOptimized)}
-                    className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-gray-500 hover:text-indigo-400 transition-colors px-2 py-1 rounded border border-gray-700"
+                    className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-gray-500 hover:text-indigo-400 transition-colors px-2 py-1 rounded border border-gray-200"
                 >
                     <ArrowRightLeft className="w-3 h-3" />
                     {showOptimized ? 'See Original' : 'See Optimized'}
@@ -142,9 +142,9 @@ const ChecklistRow = ({ icon: Icon, label, statusName, isComplete }) => {
     const [expanded, setExpanded] = useState(false);
     
     return (
-        <div className="flex flex-col border border-gray-700/50 rounded-md bg-gray-800/50 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors" onClick={() => !isComplete && setExpanded(!expanded)}>
+        <div className="flex flex-col border border-gray-200/50 rounded-md bg-gray-100/50 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors" onClick={() => !isComplete && setExpanded(!expanded)}>
             <div className="flex justify-between items-center p-3">
-                <div className="flex items-center gap-3 text-sm font-bold text-gray-300">
+                <div className="flex items-center gap-3 text-sm font-bold text-gray-700">
                     <Icon className="w-4 h-4 text-gray-500"/> {label}
                 </div>
                 {isComplete ? (
@@ -174,22 +174,22 @@ const ChecklistRow = ({ icon: Icon, label, statusName, isComplete }) => {
 // ==========================================
 const DetailCard = ({ id, title, icon: Icon, isPass, issueText, explanation, suggestion, children }) => (
     <div id={id} className="scroll-mt-28 mb-10 group">
-        <h2 className="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
             <Icon className={`w-6 h-6 ${isPass ? 'text-green-400' : 'text-red-500'}`} /> {title}
         </h2>
-        <div className={`border border-gray-700 rounded-xl p-6 md:p-8 bg-gray-800/40 backdrop-blur-md shadow-sm border-t-4 transition-shadow hover:shadow-md ${isPass ? 'border-t-green-500' : 'border-t-red-500'}`}>
+        <div className={`border border-gray-200 rounded-xl p-6 md:p-8 bg-gray-50/50 backdrop-blur-md shadow-sm border-t-4 transition-shadow hover:shadow-md ${isPass ? 'border-t-green-500' : 'border-t-red-500'}`}>
             <div className="flex justify-between items-start mb-4">
                 <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${isPass ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                     {issueText}
                 </span>
             </div>
-            {explanation && <p className="text-gray-400 text-sm mb-5 leading-relaxed font-medium">{explanation}</p>}
+            {explanation && <p className="text-gray-500 text-sm mb-5 leading-relaxed font-medium">{explanation}</p>}
             {!isPass && suggestion && (
-                <div className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-5 mb-5">
-                    <h4 className="text-xs font-bold text-gray-100 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <div className="bg-gray-100/50 border border-gray-200/50 rounded-lg p-5 mb-5">
+                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2 flex items-center gap-2">
                         <Zap className="w-4 h-4 text-amber-500"/> How to fix this
                     </h4>
-                    <p className="text-[13px] text-gray-400 font-medium leading-relaxed">{suggestion}</p>
+                    <p className="text-[13px] text-gray-500 font-medium leading-relaxed">{suggestion}</p>
                 </div>
             )}
             {children && (
@@ -201,6 +201,197 @@ const DetailCard = ({ id, title, icon: Icon, isPass, issueText, explanation, sug
     </div>
 );
 
+
+// ==========================================
+// Component: Live Editor Modal (Real-Time Inline)
+// ==========================================
+const LiveEditorModal = ({ result, rawResumeText, onClose }) => {
+    const [lines, setLines] = useState((rawResumeText || "Your resume text here...").split('\n'));
+    const [editingIndex, setEditingIndex] = useState(null);
+    
+    // Derived issues
+    const grammarIssues = result?.spelling_errors || [];
+    const weakPhrases = result?.quantificationSuggestions || [];
+    const missingSkills = result?.missingSkills || [];
+    
+    // Helper to highlight a line
+    const highlightLine = (line, idx) => {
+        if (editingIndex === idx) {
+            return (
+                <textarea 
+                    autoFocus
+                    value={line}
+                    onChange={(e) => {
+                        const newLines = [...lines];
+                        newLines[idx] = e.target.value;
+                        setLines(newLines);
+                    }}
+                    onBlur={() => setEditingIndex(null)}
+                    className="w-full bg-white border border-indigo-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[60px] resize-none shadow-sm text-gray-800"
+                />
+            );
+        }
+        
+        let highlighted = line;
+        let hasIssue = false;
+        
+        // 1. Weak Phrases (Orange)
+        if (weakPhrases.length > 0) {
+            weakPhrases.forEach(wp => {
+                const snippet = wp.sentence.replace('...', '').trim().substring(0, 30);
+                if (snippet.length > 5 && line.includes(snippet)) {
+                    hasIssue = true;
+                    highlighted = highlighted.replace(
+                        snippet, 
+                        `<span class="bg-orange-200 border-b-2 border-orange-400 cursor-pointer text-orange-900 group relative" title="Weak Phrase: ${wp.issue} | Suggestion: ${wp.fix}">${snippet}</span>`
+                    );
+                }
+            });
+        }
+        
+        // 2. Grammar Issues (Red)
+        if (grammarIssues.length > 0) {
+            grammarIssues.forEach(ge => {
+                const word = ge.word;
+                if (word && word.length > 2) {
+                    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                    if (regex.test(line)) {
+                        hasIssue = true;
+                        highlighted = highlighted.replace(
+                            regex, 
+                            `<span class="bg-red-200 border-b-2 border-red-500 cursor-pointer text-red-900 group relative" title="Spelling: ${word} -> ${ge.suggestion}">$&</span>`
+                        );
+                    }
+                }
+            });
+        }
+
+        return (
+            <div 
+                onClick={() => setEditingIndex(idx)}
+                className={`min-h-[24px] cursor-text hover:bg-gray-50 border border-transparent hover:border-indigo-200 p-1 rounded transition-colors whitespace-pre-wrap ${hasIssue ? 'mb-1' : ''}`}
+                dangerouslySetInnerHTML={{ __html: highlighted || '<br/>' }}
+            />
+        );
+    };
+
+    const handleDownload = () => {
+         // Temporarily hide background elements for print
+         document.body.classList.add('print-modal-only');
+         window.print();
+         document.body.classList.remove('print-modal-only');
+    };
+
+    return (
+        <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-4 lg:p-8"
+        >
+            <motion.div 
+                initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
+                className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden border border-gray-200"
+            >
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-gray-200 bg-white flex justify-between items-center shadow-sm z-10 print:hidden">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-indigo-100 p-2 rounded-lg"><PenTool className="w-5 h-5 text-indigo-600"/></div>
+                        <div>
+                            <h2 className="text-xl font-black text-gray-900 leading-tight">Interactive Resume Editor</h2>
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Click any text to edit inline</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-3">
+                        <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-sm shadow-sm transition-colors">
+                            <FileDown className="w-4 h-4"/> Download PDF
+                        </button>
+                        <button onClick={onClose} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                            <XCircle className="w-6 h-6"/>
+                        </button>
+                    </div>
+                </div>
+                
+                {/* Body Split */}
+                <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-white">
+                    
+                    {/* Left: Interactive Resume */}
+                    <div className="w-full md:w-2/3 overflow-y-auto bg-gray-100/50 p-6 md:p-8 custom-scrollbar relative print:w-full print:p-0">
+                        <div className="max-w-[210mm] mx-auto bg-white min-h-[297mm] shadow-lg border border-gray-200 p-8 md:p-12 text-gray-800 font-sans leading-relaxed text-[14px] md:text-[15px] outline-none print:shadow-none print:border-none print:p-0">
+                            {lines.map((line, idx) => (
+                                <React.Fragment key={idx}>
+                                    {highlightLine(line, idx)}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Right: Suggestions Panel */}
+                    <div className="w-full md:w-1/3 overflow-y-auto bg-white border-l border-gray-200 p-6 custom-scrollbar flex flex-col gap-6 print:hidden">
+                        <div>
+                            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2 mb-4 border-b pb-2">
+                                <Activity className="w-4 h-4 text-indigo-500"/> Improvement Radar
+                            </h3>
+                            <p className="text-xs text-gray-500 font-medium mb-4">
+                                Click on any highlighted text in the document to edit inline & fix the errors below.
+                            </p>
+                        </div>
+
+                        {missingSkills.length > 0 && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 shadow-sm">
+                                <h4 className="text-xs font-bold text-yellow-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><Target className="w-3 h-3"/> Missing Keywords</h4>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {missingSkills.map(skill => (
+                                        <span key={skill} className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-[11px] font-bold border border-yellow-200">{skill}</span>
+                                    ))}
+                                </div>
+                                <p className="text-[10px] text-yellow-600 mt-2 font-medium">Inject these naturally into your Experience section.</p>
+                            </div>
+                        )}
+
+                        {weakPhrases.length > 0 && (
+                            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 shadow-sm">
+                                <h4 className="text-xs font-bold text-orange-800 uppercase tracking-wider mb-3 flex items-center gap-1.5"><AlertTriangle className="w-3 h-3"/> Weak Phrases</h4>
+                                <div className="space-y-3">
+                                    {weakPhrases.map((wp, i) => (
+                                        <div key={i} className="bg-white border border-orange-100 rounded-lg p-3 shadow-sm">
+                                            <span className="bg-orange-100 text-orange-800 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase mb-1 inline-block">Issue: {wp.issue}</span>
+                                            <p className="text-xs text-gray-600 italic line-clamp-2 mt-1">"{wp.sentence}"</p>
+                                            <div className="mt-2 text-xs font-bold text-orange-600 flex items-start gap-1">
+                                                <ArrowRightLeft className="w-3 h-3 mt-0.5 shrink-0"/> {wp.fix}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {grammarIssues.length > 0 && (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm">
+                                <h4 className="text-xs font-bold text-red-800 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Type className="w-3 h-3"/> Spelling & Grammar</h4>
+                                <div className="space-y-2">
+                                    {grammarIssues.map((ge, i) => (
+                                        <div key={i} className="flex justify-between items-center bg-white border border-red-100 p-2 rounded-lg text-xs shadow-sm">
+                                            <span className="text-red-500 font-bold line-through">{ge.word}</span>
+                                            <ArrowRightLeft className="w-3 h-3 text-gray-400 mx-2"/>
+                                            <span className="text-green-600 font-bold">{ge.suggestion}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {missingSkills.length === 0 && weakPhrases.length === 0 && grammarIssues.length === 0 && (
+                            <div className="text-center py-10 opacity-50">
+                                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2"/>
+                                <p className="text-sm font-bold">Looks flawless!</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 export default function Dashboard() {
     const { state } = useLocation();
     const navigate = useNavigate();
@@ -209,8 +400,15 @@ export default function Dashboard() {
     const [expandedSections, setExpandedSections] = useState({ content: true, sections: true, 'ats-essentials': true, tailoring: true });
     const [activeItemId, setActiveItemId] = useState(null);
     const [isEditingMode, setIsEditingMode] = useState(false);
-    const [editedText, setEditedText] = useState("");
-    const [isRescanning, setIsRescanning] = useState(false);
+    const [resumeForm, setResumeForm] = useState({
+        name: result?.name || "Your Name",
+        summary: "",
+        skills: result?.resume_skills ? result.resume_skills.join(", ") : "",
+        experience: "",
+        projects: "",
+        education: ""
+    });
+    
 
     const toggleSection = (sectionId) => {
         setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
@@ -246,24 +444,14 @@ export default function Dashboard() {
         match_score = 0, rawResumeText = ''
     } = result || {};
     
-    const handleRescan = async () => {
-        setIsRescanning(true);
-        try {
-            const apiRes = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/analyze-text`, {
-                text: editedText,
-                candidateName: result.name || "Applicant",
-                jobDescription: result.jobDescription || ""
-            });
-            // Update dashboard with new data
-            navigate('.', { state: apiRes.data, replace: true });
-            setScanPhase(0);
-            setIsEditingMode(false);
-        } catch (error) {
-            alert("Analysis failed. Please check backend connection.");
-        } finally {
-            setIsRescanning(false);
-        }
-    };
+    
+
+    // Dynamic Word Count Logic
+    const currentText = isEditingMode 
+        ? Object.values(resumeForm).join(' ') 
+        : rawResumeText || '';
+    const dynamicWordCount = currentText.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const dynamicReadTime = Math.max(1, Math.ceil(dynamicWordCount / 200));
 
     // Step 2: Data Extraction
     const hasEmail = diagnosticReport?.some(r => r.aspect === 'Email Included' && r.status === 'pass');
@@ -401,8 +589,8 @@ export default function Dashboard() {
                     <ul className="space-y-2 mt-2">
                         {repetition_errors.map((err, i) => (
                             <li key={i} className="bg-red-500/10 p-3 rounded-lg border border-red-500/20 flex flex-col">
-                                <span className="font-bold text-gray-300">{err}</span>
-                                <span className="text-[11px] text-gray-400 mt-1">Try using synonyms or restructuring sentences to avoid sounding repetitive.</span>
+                                <span className="font-bold text-gray-700">{err}</span>
+                                <span className="text-[11px] text-gray-500 mt-1">Try using synonyms or restructuring sentences to avoid sounding repetitive.</span>
                             </li>
                         ))}
                     </ul>
@@ -421,7 +609,7 @@ export default function Dashboard() {
             <>
                 <p className="mb-2">Simple typos can instantly disqualify you from competitive roles.</p>
                 {Array.isArray(spelling_errors) && spelling_errors.length > 0 && (
-                    <ul className="space-y-2 mt-2">{spelling_errors.map((err, i) => <li key={i} className="bg-red-500/10 p-3 rounded-lg border border-red-500/20 flex flex-col"><span className="font-bold text-gray-300">Error: <span className="text-red-400">{err?.word}</span></span><span className="font-bold flex gap-1 mt-1 text-gray-300"><ArrowRightLeft className="w-3 h-3 text-gray-500"/> Suggestion: <span className="text-green-400">{err?.suggestion}</span></span></li>)}</ul>
+                    <ul className="space-y-2 mt-2">{spelling_errors.map((err, i) => <li key={i} className="bg-red-500/10 p-3 rounded-lg border border-red-500/20 flex flex-col"><span className="font-bold text-gray-700">Error: <span className="text-red-400">{err?.word}</span></span><span className="font-bold flex gap-1 mt-1 text-gray-700"><ArrowRightLeft className="w-3 h-3 text-gray-500"/> Suggestion: <span className="text-green-400">{err?.suggestion}</span></span></li>)}</ul>
                 )}
             </>
         ),
@@ -456,29 +644,20 @@ export default function Dashboard() {
 
     // Step 3: Update UI
     return (
-        <div className="min-h-screen w-full bg-gray-900 text-gray-100 font-sans antialiased overflow-y-auto custom-scrollbar flex">
+        <div className="min-h-screen w-full bg-white text-gray-900 font-sans antialiased overflow-y-auto custom-scrollbar flex">
             
             {/* LEFT SIDEBAR */}
-            <div className="w-72 shrink-0 border-r border-gray-700/50 bg-gray-900 min-h-screen h-full fixed top-[72px] left-0 overflow-y-auto p-6 flex flex-col hidden lg:flex">
+            <div className="w-72 shrink-0 border-r border-gray-200/50 bg-white min-h-screen h-full fixed top-[72px] left-0 overflow-y-auto p-6 flex flex-col hidden lg:flex">
                 
                 {/* Score Gauge */}
-                <div className="flex flex-col items-center border-b border-gray-700/50 pb-8 mb-6">
+                <div className="flex flex-col items-center border-b border-gray-200/50 pb-8 mb-6">
                     <ScoreRing calculatedScore={finalScore} scanPhase={scanPhase} />
-                    <div className="flex gap-4">
-                        <div className="text-center">
-                            <span className="block text-gray-100 font-black text-lg">{scanPhase >= 3 ? safeWordCount : 0}</span>
-                            <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Words</span>
-                        </div>
-                        <div className="w-px bg-gray-700 h-8"></div>
-                        <div className="text-center">
-                            <span className="block text-gray-100 font-black text-lg">{scanPhase >= 3 ? readingTime : 0}</span>
-                            <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Minutes</span>
-                        </div>
+                    <div className="text-center font-bold text-gray-700 text-sm mt-4 bg-gray-100 px-4 py-2 rounded-full shadow-inner">
+                        {scanPhase >= 3 ? dynamicWordCount : 0} Words &bull; {scanPhase >= 3 ? dynamicReadTime : 0} min read
                     </div>
                 </div>
-
                 {/* 1. Score Breakdown Gauges */}
-                <div className="bg-[#f8fafc] rounded-lg p-6 mb-8 border border-gray-700/50">
+                <div className="bg-[#f8fafc] rounded-lg p-6 mb-8 border border-gray-200/50">
                     <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-1.5">
                         <Activity className="w-3 h-3 text-blue-500"/> Performance Metrics
                     </h3>
@@ -493,12 +672,12 @@ export default function Dashboard() {
                     {sidebarData.map((section) => {
                         const isExpanded = expandedSections[section.id];
                         return (
-                            <div key={section.id} className="border-b border-gray-700/50 last:border-0 pb-1">
+                            <div key={section.id} className="border-b border-gray-200/50 last:border-0 pb-1">
                                 <button
                                     onClick={() => toggleSection(section.id)}
-                                    className="w-full flex items-center justify-between p-2 hover:bg-gray-800/50 rounded-lg group transition-colors focus:outline-none"
+                                    className="w-full flex items-center justify-between p-2 hover:bg-gray-100/50 rounded-lg group transition-colors focus:outline-none"
                                 >
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-indigo-400">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-indigo-400">
                                         {section.title}
                                     </span>
                                     <div className="flex items-center gap-2">
@@ -518,7 +697,7 @@ export default function Dashboard() {
                                                     key={item.id}
                                                     onClick={() => handleItemClick(item.id)}
                                                     className={`flex items-start gap-2 w-full text-left p-1.5 rounded-md transition-colors ${
-                                                        isActive ? 'bg-indigo-500/10' : 'hover:bg-gray-800/50'
+                                                        isActive ? 'bg-indigo-500/10' : 'hover:bg-gray-100/50'
                                                     }`}
                                                 >
                                                     {item.isPass ? (
@@ -527,7 +706,7 @@ export default function Dashboard() {
                                                         <XCircle className="w-3 h-3 text-red-500 mt-0.5 shrink-0" />
                                                     )}
                                                     <div className="flex flex-col">
-                                                        <span className={`text-[10px] font-bold ${isActive ? 'text-indigo-300' : 'text-gray-400'}`}>
+                                                        <span className={`text-[10px] font-bold ${isActive ? 'text-indigo-300' : 'text-gray-500'}`}>
                                                             {item.label}
                                                         </span>
                                                         <span className={`text-[9px] ${item.isPass ? 'text-gray-500' : 'text-red-500 font-bold'}`}>
@@ -544,11 +723,11 @@ export default function Dashboard() {
                     })}
                 </div>
 
-                {/* Audit Progress Box */}
-                <div className="mt-auto bg-[#f8fafc] rounded-lg p-4 border border-gray-700/50">
+                {/* Analysis Progress Box */}
+                <div className="mt-auto bg-[#f8fafc] rounded-lg p-4 border border-gray-200/50">
                     <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                         {scanPhase < 4 ? <Loader2 className="w-3 h-3 animate-spin"/> : <Activity className="w-3 h-3 text-green-400"/>}
-                        Audit Progress
+                        Analysis Progress
                     </h3>
                     <div className="space-y-3">
                         {scanSteps.map((step, idx) => {
@@ -557,11 +736,11 @@ export default function Dashboard() {
                             
                             return (
                                 <div key={idx} className={`flex items-center justify-between transition-opacity duration-500 ${isPast || isActive ? 'opacity-100' : 'opacity-30'}`}>
-                                    <span className={`text-[11px] font-bold ${isPast ? 'text-gray-400' : isActive ? 'text-indigo-400' : 'text-gray-500'}`}>
+                                    <span className={`text-[11px] font-bold ${isPast ? 'text-gray-500' : isActive ? 'text-indigo-400' : 'text-gray-500'}`}>
                                         Step {idx + 1}
                                     </span>
                                     <div className="shrink-0 flex items-center gap-2">
-                                        <span className={`text-[9px] uppercase tracking-wider font-bold ${isPast ? 'text-gray-400' : isActive ? 'text-indigo-400' : 'text-gray-500'}`}>
+                                        <span className={`text-[9px] uppercase tracking-wider font-bold ${isPast ? 'text-gray-500' : isActive ? 'text-indigo-400' : 'text-gray-500'}`}>
                                             {isPast ? 'Complete' : isActive ? 'Scanning' : 'Pending'}
                                         </span>
                                         {isPast ? (
@@ -584,16 +763,16 @@ export default function Dashboard() {
             <div className="flex-1 lg:ml-72 mt-[72px] px-6 lg:px-12 py-8 max-w-5xl">
                 
                 {/* Professional Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 pb-6 border-b border-gray-700/50">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 pb-6 border-b border-gray-200/50">
                     <div>
-                        <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 tracking-tight">Full Diagnostic Audit</h1>
-                        <p className="text-sm font-bold text-gray-400 mt-1 uppercase tracking-wider">Targeting: {suggestedRoles?.[0] || 'Software Professional'}</p>
+                        <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 tracking-tight">Resume Analysis Dashboard</h1>
+                        <p className="text-sm font-bold text-gray-500 mt-1 uppercase tracking-wider">Targeting: {suggestedRoles?.[0] || 'Software Professional'}</p>
                     </div>
                     <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-center gap-3">
                         <motion.button 
                             whileHover={{ y: -2 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => { setEditedText(rawResumeText); setIsEditingMode(true); }} 
+                            onClick={() => setIsEditingMode(true)} 
                             className={`flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-500/25 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                         >
                             <PenTool className="w-4 h-4" /> Live Edit
@@ -602,7 +781,7 @@ export default function Dashboard() {
                             whileHover={{ y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={handleDownload} 
-                            className={`flex items-center justify-center gap-2 bg-gray-800/40 backdrop-blur-md hover:bg-gray-800/50 text-gray-300 py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm border border-gray-700 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                            className={`flex items-center justify-center gap-2 bg-gray-50/50 backdrop-blur-md hover:bg-gray-100/50 text-gray-700 py-2 px-5 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm border border-gray-200 transition-all duration-1000 w-full sm:w-auto ${scanPhase === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                         >
                             <FileDown className="w-4 h-4" /> Download PDF <Crown className="w-3 h-3 text-amber-500"/>
                         </motion.button>
@@ -612,13 +791,13 @@ export default function Dashboard() {
                 {/* Engaging Laser Scanner Animation while scanPhase < 4 */}
                 {scanPhase < 4 && (
                     <div className="space-y-6 lg:max-w-[700px] xl:max-w-none">
-                        <div className="bg-gray-800/40 backdrop-blur-md border border-gray-700 rounded-3xl p-12 flex flex-col items-center justify-center shadow-sm relative overflow-hidden min-h-[400px]">
+                        <div className="bg-gray-50/50 backdrop-blur-md border border-gray-200 rounded-3xl p-12 flex flex-col items-center justify-center shadow-sm relative overflow-hidden min-h-[400px]">
                             {/* Futuristic Background Gradients */}
                             <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: 'linear' }} className="absolute -left-20 -top-20 w-64 h-64 bg-indigo-500/20 blur-3xl rounded-full" />
                             <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: 'linear' }} className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/20 blur-3xl rounded-full" />
                             
                             {/* Document Scanner Graphic */}
-                            <div className="relative w-28 h-40 bg-gray-800/50 border-2 border-gray-700 rounded-xl overflow-hidden flex flex-col items-center justify-center shadow-inner z-10 mb-8">
+                            <div className="relative w-28 h-40 bg-gray-100/50 border-2 border-gray-200 rounded-xl overflow-hidden flex flex-col items-center justify-center shadow-inner z-10 mb-8">
                                 <FileText className="w-12 h-12 text-gray-600 mb-2" />
                                 <div className="space-y-1.5 w-16">
                                     <div className="h-1 bg-gray-600 rounded w-full"></div>
@@ -659,10 +838,10 @@ export default function Dashboard() {
                         </div>
                         
                         {/* Smaller skeleton below the scanner to fill space pleasantly */}
-                        <div className="bg-gray-800/40 backdrop-blur-md p-6 rounded-3xl border border-gray-700/50 shadow-sm opacity-50 animate-pulse hidden sm:block">
+                        <div className="bg-gray-50/50 backdrop-blur-md p-6 rounded-3xl border border-gray-200/50 shadow-sm opacity-50 animate-pulse hidden sm:block">
                             <div className="h-4 bg-gray-700 rounded-full w-1/3 mb-4"></div>
-                            <div className="h-3 bg-gray-800/50 rounded-full w-full mb-2"></div>
-                            <div className="h-3 bg-gray-800/50 rounded-full w-5/6"></div>
+                            <div className="h-3 bg-gray-100/50 rounded-full w-full mb-2"></div>
+                            <div className="h-3 bg-gray-100/50 rounded-full w-5/6"></div>
                         </div>
                     </div>
                 )}
@@ -671,9 +850,9 @@ export default function Dashboard() {
                     
                     <div className="flex flex-col gap-10 mb-16 scroll-mt-28">
                         {sidebarData.map(category => (
-                            <div id={category.id} key={category.id} className="bg-gray-800/40 backdrop-blur-md rounded-2xl shadow-sm border border-gray-700 overflow-hidden flex flex-col">
-                                <div className="px-6 py-5 border-b border-gray-700/50 bg-gray-800/30">
-                                    <h2 className="text-sm font-black text-gray-100 uppercase tracking-widest flex items-center gap-2">
+                            <div id={category.id} key={category.id} className="bg-gray-50/50 backdrop-blur-md rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                                <div className="px-6 py-5 border-b border-gray-200/50 bg-gray-50/30">
+                                    <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
                                         <Layout className="w-5 h-5 text-gray-500"/> {category.title}
                                     </h2>
                                 </div>
@@ -685,17 +864,17 @@ export default function Dashboard() {
                                             if (item.message === 'Needs improvement') badgeColors = 'bg-yellow-50 text-yellow-600 border border-yellow-100';
                                         }
                                         return (
-                                            <div id={item.id} key={item.id} className={`flex flex-col px-6 py-5 hover:bg-gray-800/50 transition-colors scroll-mt-28 ${index !== category.items.length - 1 ? 'border-b border-gray-700/50' : ''}`}>
+                                            <div id={item.id} key={item.id} className={`flex flex-col px-6 py-5 hover:bg-gray-100/50 transition-colors scroll-mt-28 ${index !== category.items.length - 1 ? 'border-b border-gray-200/50' : ''}`}>
                                                 <div className="flex flex-row items-center justify-between">
                                                     <div className="flex items-center gap-3">
                                                         {item.isPass ? <CheckCircle className="w-5 h-5 text-green-400 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />}
-                                                        <span className="text-base font-bold text-gray-100">{item.label}</span>
+                                                        <span className="text-base font-bold text-gray-900">{item.label}</span>
                                                     </div>
                                                     <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${badgeColors}`}>
                                                         {item.message || (item.isPass ? 'No issues' : 'Needs Work')}
                                                     </span>
                                                 </div>
-                                                <div className="ml-8 mt-4 text-[13px] text-gray-400 leading-relaxed font-medium">
+                                                <div className="ml-8 mt-4 text-[13px] text-gray-500 leading-relaxed font-medium">
                                                     {categoryDetails[item.id]}
                                                 </div>
                                             </div>
@@ -708,23 +887,23 @@ export default function Dashboard() {
 
                     {/* Actionable Re-upload Footer */}
                     <div className="mt-8 mb-20">
-                        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 sm:p-10 shadow-lg shadow-blue-900/10 text-center flex flex-col items-center justify-center border border-gray-700/50 relative overflow-hidden">
+                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 sm:p-10 shadow-lg shadow-blue-900/5 text-center flex flex-col items-center justify-center border border-gray-200/50 relative overflow-hidden">
                             {/* Decorative background elements */}
-                            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gray-800/40 backdrop-blur-md opacity-5 rounded-full blur-2xl"></div>
-                            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-gray-800/40 backdrop-blur-md opacity-5 rounded-full blur-2xl"></div>
+                            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gray-50/50 backdrop-blur-md opacity-5 rounded-full blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-gray-50/50 backdrop-blur-md opacity-5 rounded-full blur-2xl"></div>
                             
                             <Crown className="w-12 h-12 text-indigo-400 mb-4 relative z-10" />
                             <h2 className="text-2xl font-black text-white tracking-tight mb-2 relative z-10">
                                 Make your edits & try again!
                             </h2>
-                            <p className="text-gray-300 text-sm font-medium max-w-md mx-auto mb-8 relative z-10 leading-relaxed">
+                            <p className="text-gray-700 text-sm font-medium max-w-md mx-auto mb-8 relative z-10 leading-relaxed">
                                 Our analyzer acts identically to a corporate ATS. Improve the identified issues manually and re-analyze your updated resume to ensure an ascending Nexus Score.
                             </p>
                             
                             <motion.button 
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                onClick={() => { setEditedText(rawResumeText); setIsEditingMode(true); }}
+                                onClick={() => setIsEditingMode(true)}
                                 className="relative z-10 flex items-center gap-3 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 backdrop-blur-md hover:text-blue-800 transition-colors px-8 py-4 rounded-xl font-black shadow-xl shadow-blue-900/20 text-sm uppercase tracking-wider"
                             >
                                 <PenTool className="w-5 h-5" />
@@ -735,48 +914,18 @@ export default function Dashboard() {
                 </div>
             </div>
             
+            
             {/* Live Editor Modal */}
             <AnimatePresence>
                 {isEditingMode && (
-                    <motion.div 
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 lg:p-8"
-                    >
-                        <motion.div 
-                            initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
-                            className="bg-gray-800/40 backdrop-blur-md rounded-2xl shadow-xl w-full max-w-4xl max-h-full flex flex-col overflow-hidden border border-gray-700"
-                        >
-                            <div className="px-6 py-4 border-b border-gray-700/50 flex justify-between items-center bg-gray-800/50">
-                                <div>
-                                    <h2 className="text-lg font-black text-gray-100 flex items-center gap-2"><Type className="w-5 h-5 text-indigo-400"/> In-Browser Live Editor</h2>
-                                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-1">Make direct text changes to bypass the ATS parser instantly</p>
-                                </div>
-                                <button onClick={() => setIsEditingMode(false)} className="text-gray-500 hover:text-red-500 transition-colors p-1"><XCircle className="w-6 h-6"/></button>
-                            </div>
-                            <div className="p-0 flex-1 overflow-hidden flex flex-col bg-gray-800/40 backdrop-blur-md">
-                                <textarea 
-                                    value={editedText || ''}
-                                    onChange={(e) => setEditedText(e.target.value)}
-                                    className="w-full h-[50vh] sm:h-[60vh] p-6 focus:outline-none transition-colors font-mono text-sm leading-relaxed text-gray-300 bg-gray-800/40 backdrop-blur-md resize-none"
-                                    placeholder="Your extracted resume text will appear here. Making changes here simulates an immediate PDF re-upload..."
-                                />
-                            </div>
-                            <div className="px-6 py-4 border-t border-gray-700/50 flex justify-end gap-3 bg-gray-800/50">
-                                <button onClick={() => setIsEditingMode(false)} className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-gray-400 hover:bg-gray-600 transition-colors border border-gray-700">Cancel</button>
-                                <button 
-                                    onClick={handleRescan}
-                                    disabled={isRescanning}
-                                    className="px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-500 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/25 disabled:opacity-50"
-                                >
-                                    {isRescanning ? <Loader2 className="w-4 h-4 animate-spin"/> : <Zap className="w-4 h-4"/>}
-                                    {isRescanning ? 'Analyzing...' : 'Execute Live Rescan'}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
+                    <LiveEditorModal 
+                        result={result}
+                        rawResumeText={rawResumeText}
+                        onClose={() => setIsEditingMode(false)}
+                    />
                 )}
             </AnimatePresence>
-            
         </div>
     );
 }
+

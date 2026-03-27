@@ -95,6 +95,7 @@ def analyze_resume():
         return jsonify({"error": "No data provided"}), 400
 
     resume_text = data.get('resume_text', '')
+    original_text = resume_text
     
     # Text Cleaning
     # Remove awkward PDF artifacts and special non-resume characters, keeping basic punctuation
@@ -227,7 +228,7 @@ def analyze_resume():
         coach_steps.append("Great job! Keep quantifying.")
 
     return jsonify({
-        "raw_resume_text": resume_text,
+        "raw_resume_text": original_text,
         "nexus_score": nexus_score,
         "ats_compatibility": ats_compatibility,
         "content_quality": content_quality,
