@@ -14,7 +14,7 @@ export default function HistoryPage() {
 
     useEffect(() => {
         if (user) {
-            axios.get(`http://localhost:4000/api/report/history/${user.id}`)
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/report/history/${user.id}`)
                 .then(res => {
                     const sorted = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     setReports(sorted);
@@ -28,7 +28,7 @@ export default function HistoryPage() {
 
     const handleDownload = async (report) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/report/download', {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/report/download`, {
                 candidate: report,
                 jobRole: report.suggestedRoles?.[0] || 'Unknown'
             }, { responseType: 'blob' });

@@ -43,7 +43,7 @@ export default function LandingPage() {
         if (user) formData.append('userId', user.id);
 
         try {
-            const response = await axios.post('http://localhost:4000/api/analyze', formData, {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/analyze`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             navigate('/dashboard', { state: response.data });

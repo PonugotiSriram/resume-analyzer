@@ -64,7 +64,7 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
         // Sent text to Python AI Service
         let aiResult;
         try {
-            const response = await axios.post('http://127.0.0.1:5000/analyze', {
+            const response = await axios.post(process.env.AI_SERVICE_URL || 'https://your-ai-service.onrender.com/analyze', {
                 resume_text: text,
                 job_description: jd,
                 linkedin_url: linkedinUrl,
@@ -172,7 +172,7 @@ app.post('/api/analyze-text', async (req, res) => {
         // Send text directly to Python AI Service
         let aiResult;
         try {
-            const response = await axios.post('http://127.0.0.1:5000/analyze', {
+            const response = await axios.post(process.env.AI_SERVICE_URL || 'https://your-ai-service.onrender.com/analyze', {
                 resume_text: text,
                 job_description: jobDescription,
                 linkedin_url: linkedinUrl,

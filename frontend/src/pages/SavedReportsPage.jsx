@@ -23,7 +23,7 @@ export default function SavedReportsPage() {
 
     const handleDownload = async (report) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/report/download', {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/report/download`, {
                 candidate: report,
                 jobRole: report.suggestedRoles?.[0] || 'Unknown'
             }, { responseType: 'blob' });

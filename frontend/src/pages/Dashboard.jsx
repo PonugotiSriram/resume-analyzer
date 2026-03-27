@@ -249,7 +249,7 @@ export default function Dashboard() {
     const handleRescan = async () => {
         setIsRescanning(true);
         try {
-            const apiRes = await axios.post('http://localhost:4000/api/analyze-text', {
+            const apiRes = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/analyze-text`, {
                 text: editedText,
                 candidateName: result.name || "Applicant",
                 jobDescription: result.jobDescription || ""
@@ -365,7 +365,7 @@ export default function Dashboard() {
 
     const handleDownload = async () => {
         try {
-            const response = await axios.post('http://localhost:4000/api/report/download', {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/report/download`, {
                 candidate: result,
                 jobRole: suggestedRoles?.[0] || 'Unknown'
             }, { responseType: 'blob' });

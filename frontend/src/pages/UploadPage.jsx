@@ -73,7 +73,7 @@ export default function UploadPage() {
         try {
             // Force a minimum UX delay of 3 seconds so the user can experience the scanning animation
             const minTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
-            const axiosPromise = axios.post('http://localhost:4000/api/analyze', formData, {
+            const axiosPromise = axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/analyze`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 

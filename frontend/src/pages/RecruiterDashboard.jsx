@@ -20,7 +20,7 @@ export default function RecruiterDashboard() {
 
     const fetchCandidates = async () => {
         try {
-            const res = await axios.get('http://localhost:4000/api/candidates');
+            const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/candidates`);
             // ensure recruiterStatus exists
             const mapped = res.data.map(c => ({ ...c, recruiterStatus: c.recruiterStatus || 'Under Review' }));
             setCandidates(mapped);
@@ -65,7 +65,7 @@ export default function RecruiterDashboard() {
         formData.append('candidateName', candidateName || 'Anonymous Candidate');
 
         try {
-            await axios.post('http://localhost:4000/api/upload', formData, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             // refresh list
@@ -82,7 +82,7 @@ export default function RecruiterDashboard() {
 
     const handleStatusChange = async (id, newStatus) => {
         try {
-            await axios.put(`http://localhost:4000/api/candidates/${id}/status`, { status: newStatus });
+            await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/candidates/${id}/status`, { status: newStatus });
             setCandidates(prev => prev.map(c => c.id === id ? { ...c, recruiterStatus: newStatus } : c));
         } catch (err) {
             console.error("Failed to update status", err);
@@ -91,7 +91,7 @@ export default function RecruiterDashboard() {
 
     const handleDownload = async (cand) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/report/download', {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/report/download`, {
                 candidate: cand,
                 jobRole: cand.suggestedRoles?.[0] || 'Unknown'
             }, { responseType: 'blob' });

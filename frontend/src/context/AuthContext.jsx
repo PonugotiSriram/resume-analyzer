@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     // If token exists, load user
     useEffect(() => {
         if (token) {
-            axios.get('http://localhost:4000/auth/profile', {
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/profile`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(res => {
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
     }, [token]);
 
     const login = async (email, password) => {
-        const res = await axios.post('http://localhost:4000/auth/login', { email, password });
+        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, { email, password });
         setToken(res.data.token);
         setUser(res.data.user);
         localStorage.setItem('token', res.data.token);
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (name, email, password, role) => {
-        const res = await axios.post('http://localhost:4000/auth/register', { name, email, password, role });
+        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, { name, email, password, role });
         setToken(res.data.token);
         setUser(res.data.user);
         localStorage.setItem('token', res.data.token);
